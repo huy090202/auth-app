@@ -15,8 +15,11 @@ export class AppError extends Error {
 }
 
 function withTrace(c: Ctx, body: object): object {
+  // `trace` is owned by the recorder: drop any caller-supplied key.
+  const rest: Record<string, unknown> = { ...body };
+  delete rest.trace;
   const trace = c.var.trace?.entries();
-  return trace && trace.length > 0 ? { ...body, trace } : body;
+  return trace && trace.length > 0 ? { ...rest, trace } : rest;
 }
 
 export function jsonOk(c: Ctx, status: 200 | 201, body: object): Response {

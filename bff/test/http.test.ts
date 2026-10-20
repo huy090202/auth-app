@@ -28,6 +28,12 @@ test('extras cannot override error or trace', async () => {
   assert.ok(Array.isArray(body.trace));
 });
 
+test('caller-supplied trace extra is stripped when recorder is disabled', async () => {
+  const body = (await (await mk(false, false).request('/err')).json()) as Record<string, unknown>;
+  assert.equal('trace' in body, false);
+  assert.equal(body.error, 'bad');
+});
+
 test('trace is omitted when no auth-gate call was recorded', async () => {
   const body = (await (await mk(true, false).request('/ok')).json()) as Record<string, unknown>;
   assert.deepEqual(body, { a: 1 });

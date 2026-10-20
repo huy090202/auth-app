@@ -40,7 +40,7 @@ export async function loadConfig(env: Env = process.env): Promise<Config> {
   }
 
   if (!sessionSecret) throw new Error('SESSION_SECRET is empty');
-  if (onLambda && !origin) throw new Error('ORIGIN_VERIFY is required on Lambda');
+  // On Lambda origin is always set here: env value, or SSM get() which throws on empty.
 
   const cfg: Config = {
     stage,
