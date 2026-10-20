@@ -1,4 +1,4 @@
-import { ActionIcon, AppShell, Container, Group, SegmentedControl, Text, useComputedColorScheme, useMantineColorScheme } from '@mantine/core';
+import { AppShell, Button, Container, Group, SegmentedControl, Text, useComputedColorScheme, useMantineColorScheme } from '@mantine/core';
 import { Link } from 'react-router';
 import { useLang, type Lang } from './lib/i18n';
 import { AppRoutes } from './routes';
@@ -10,9 +10,9 @@ function SchemeToggle() {
   const scheme = useComputedColorScheme('light');
   const next = scheme === 'dark' ? 'light' : 'dark';
   return (
-    <ActionIcon variant="default" onClick={() => setColorScheme(next)} aria-label={`Switch to ${next} theme`}>
-      <Text fz="xs" ff={monoFont}>{scheme === 'dark' ? 'L' : 'D'}</Text>
-    </ActionIcon>
+    <Button size="xs" variant="default" onClick={() => setColorScheme(next)} aria-label={`Switch to ${next} theme`}>
+      {next === 'dark' ? 'Dark theme' : 'Light theme'}
+    </Button>
   );
 }
 

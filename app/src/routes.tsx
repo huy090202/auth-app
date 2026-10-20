@@ -1,14 +1,11 @@
 import { Navigate, Route, Routes, useParams } from 'react-router';
-import { Text, Title } from '@mantine/core';
+import { Title } from '@mantine/core';
+import { DemoRoutes } from './app';
 
-// Placeholders: Task 8 fills /docs/:page, Task 7 fills /app/*.
+// Placeholder: Task 8 fills /docs/:page.
 function DocsPage() {
   const { page } = useParams();
   return <Title order={1}>{page}</Title>;
-}
-
-function DemoPage() {
-  return <Text>Demo screens land here.</Text>;
 }
 
 export function AppRoutes() {
@@ -16,7 +13,7 @@ export function AppRoutes() {
     <Routes>
       <Route path="/" element={<Navigate to="/docs/what-it-is" replace />} />
       <Route path="/docs/:page" element={<DocsPage />} />
-      <Route path="/app/*" element={<DemoPage />} />
+      <Route path="/app/*" element={<DemoRoutes />} />
       <Route path="*" element={<Navigate to="/docs/what-it-is" replace />} />
     </Routes>
   );

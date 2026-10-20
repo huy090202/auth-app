@@ -10,7 +10,11 @@ export function fromB64url(s: string): ArrayBuffer {
 }
 
 export function toB64url(buf: ArrayBuffer | ArrayBufferView): string {
-  const bytes = buf instanceof ArrayBuffer ? new Uint8Array(buf) : new Uint8Array(buf.buffer, buf.byteOffset, buf.byteLength);
+  // ArrayBuffer.isView, not instanceof ArrayBuffer: buffers from another realm (iframes,
+  // test runners) fail instanceof.
+  const bytes = ArrayBuffer.isView(buf)
+    ? new Uint8Array(buf.buffer, buf.byteOffset, buf.byteLength)
+    : new Uint8Array(buf, 0, buf.byteLength);
   let bin = '';
   for (const b of bytes) bin += String.fromCharCode(b);
   return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
@@ -41,19 +45,22 @@ export function toRequestOptions(publicKey: unknown): PublicKeyCredentialRequest
 
 export function serializeCredential(cred: PublicKeyCredential): object {
   const r = cred.response as AuthenticatorResponse & Partial<AuthenticatorAttestationResponse & AuthenticatorAssertionResponse>;
-  const response: Record<string, string | null> = { clientDataJSON: toB64url(r.clientDataJSON) };
+  const response: Record<string, string | string[] | null> = { clientDataJSON: toB64url(r.clientDataJSON) };
   if (r.attestationObject) {
     response.attestationObject = toB64url(r.attestationObject);
+    if (typeof r.getTransports === 'function') response.transports = r.getTransports();
   } else {
     response.authenticatorData = toB64url(r.authenticatorData!);
     response.signature = toB64url(r.signature!);
     response.userHandle = r.userHandle ? toB64url(r.userHandle) : null;
   }
-  return {
+  const out: Record<string, unknown> = {
     id: cred.id,
     rawId: toB64url(cred.rawId),
     type: cred.type,
     response,
     clientExtensionResults: cred.getClientExtensionResults(),
   };
+  if (cred.authenticatorAttachment) out.authenticatorAttachment = cred.authenticatorAttachment;
+  return out;
 }

@@ -5,7 +5,7 @@ import { traceStore, useTrace, type TraceEntry } from './TraceStore';
 
 export function toCurl(e: TraceEntry): string {
   const parts = [`curl -X ${e.method} "$AUTH_GATE_URL${e.path}"`, `-H 'x-internal-access-key: <client key>'`];
-  if (e.requestBody !== undefined) {
+  if (e.requestBody !== undefined && e.requestBody !== null) {
     parts.push(`-H 'content-type: application/json'`, `-d '${JSON.stringify(e.requestBody).replace(/'/g, `'\\''`)}'`);
   }
   return parts.join(' \\\n  ');

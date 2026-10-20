@@ -39,7 +39,8 @@ export const monoFont = 'ui-monospace, SFMono-Regular, "JetBrains Mono", Menlo, 
 
 export const theme = createTheme({
   primaryColor: 'signal',
-  primaryShade: { light: 7, dark: 5 },
+  // Shade 7 in both schemes: white on #c2410c is ~5.2:1 (shade 5 was ~3.4:1).
+  primaryShade: { light: 7, dark: 7 },
   colors: { signal },
   fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif',
   fontFamilyMonospace: monoFont,

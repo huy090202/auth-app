@@ -15,19 +15,29 @@ export class ApiError extends Error {
 
 // Same-origin only: the browser never talks to auth-gate.
 export async function api<T>(path: string, init: { method?: string; body?: unknown } = {}): Promise<T> {
-  const res = await fetch(path, {
-    method: init.method ?? (init.body === undefined ? 'GET' : 'POST'),
-    credentials: 'same-origin',
-    headers: init.body === undefined ? {} : { 'content-type': 'application/json' },
-    body: init.body === undefined ? undefined : JSON.stringify(init.body),
-  });
-  const text = await res.text();
-  let body: Record<string, unknown> = {};
+  let res: Response;
   try {
-    body = text ? JSON.parse(text) : {};
+    res = await fetch(path, {
+      method: init.method ?? (init.body === undefined ? 'GET' : 'POST'),
+      credentials: 'same-origin',
+      headers: init.body === undefined ? {} : { 'content-type': 'application/json' },
+      body: init.body === undefined ? undefined : JSON.stringify(init.body),
+    });
   } catch {
-    body = {};
+    throw new ApiError(0, 'network_error', {});
   }
+  const text = await res.text().catch(() => '');
+  let body: Record<string, unknown> = {};
+  let parsed = true;
+  try {
+    const v: unknown = text ? JSON.parse(text) : {};
+    if (v !== null && typeof v === 'object' && !Array.isArray(v)) body = v as Record<string, unknown>;
+    else parsed = false;
+  } catch {
+    parsed = false;
+  }
+  // A 2xx we cannot read is a failure, not an empty success.
+  if (res.ok && !parsed) throw new ApiError(res.status, 'invalid_response', {});
   if (Array.isArray(body.trace)) traceStore.push(body.trace as TraceEntry[]);
   if (!res.ok) {
     const { error, trace: _trace, ...extras } = body;
