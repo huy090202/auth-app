@@ -29,7 +29,7 @@ export function jsonOk(c: Ctx, status: 200 | 201, body: object): Response {
 export function jsonError(c: Ctx, err: AppError): Response {
   return c.json(
     withTrace(c, { ...err.extras, error: err.code }),
-    err.status as 400 | 401 | 403 | 404 | 409 | 429 | 500 | 502,
+    err.status as 400 | 401 | 403 | 404 | 409 | 410 | 423 | 429 | 500 | 502,
   );
 }
 
