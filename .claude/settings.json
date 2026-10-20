@@ -1,0 +1,8 @@
+{
+  "statusLine": { "type": "command", "command": "bash \"$CLAUDE_PROJECT_DIR\"/.claude/statusline.sh" },
+  "hooks": {
+    "SessionStart": [ { "matcher": "startup|resume|clear|compact",
+      "hooks": [ { "type": "command", "command": "bash \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/session-start.sh" } ] } ],
+    "UserPromptSubmit": [ { "hooks": [ { "type": "command", "command": "bash \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/context-guard.sh" } ] } ]
+  }
+}
