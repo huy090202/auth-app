@@ -35,7 +35,7 @@ state only. It never merges into `main`.
 ## Your own continuity
 
 When the context guard fires, write `handoffs/orchestrator/<yyyy-mm-dd-hhmm>.md` in the
-handoff format, commit, and print `cd <absolute path of this orchestrator worktree> && claude`.
+handoff format, commit, and print `cd /home/work/auth-app/orchestrator && claude`.
 
 ## Commits
 
