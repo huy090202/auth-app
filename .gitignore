@@ -1,0 +1,11 @@
+/local
+node_modules/
+.env
+.env.*
+!.env.example
+.claude/settings.local.json
+bruno/environments/*.yml
+!bruno/environments/*.example.yml
+.superpowers/
+dist/
+.aws-sam/
