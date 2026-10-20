@@ -72,7 +72,12 @@ export function FactorForm<T>({ factors, start, verify, onDone }: {
       if (isCancelled(e)) return;
       if (!(e instanceof ApiError)) setError(describe(e));
       else if (e.code === 'verification_failed') {
-        setError(`Wrong PIN, ${String(e.extras.attemptsRemaining)} attempts left`);
+        const left = e.extras.attemptsRemaining;
+        setError(
+          factor === 'pin' && typeof left === 'number'
+            ? `Wrong PIN, ${left} attempts left`
+            : 'Verification failed, try again.',
+        );
         setPin('');
       } else if (e.code === 'locked') setLockedUntil(String(e.extras.lockedUntil));
       else if (e.code === 'challenge_gone') setError('Expired, try again.');

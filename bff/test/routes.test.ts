@@ -144,6 +144,13 @@ test('login with a pin factor → next second-factor and a half cookie; /api/me 
   assert.equal(me.json.error, 'second_factor_required');
 });
 
+test('second-factor/start with no cookie → 401 unauthorized', async () => {
+  const h = await harness();
+  const r = await call(h, 'POST', '/api/auth/second-factor/start', { factor: 'pin' });
+  assert.equal(r.status, 401);
+  assert.equal(r.json.error, 'unauthorized');
+});
+
 test('second-factor/start with a full session → 409 already_verified', async () => {
   const h = await harness();
   const cookie = await fullSession(h);

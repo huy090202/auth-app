@@ -15,7 +15,7 @@ export function remoteJwks(baseUrl: string): JWTVerifyGetKey {
   });
 }
 
-/** Verify an auth-gate step-up token. Any failure throws TokenRejectedError. */
+/** Verify an auth-gate token (login or step-up). Any failure throws TokenRejectedError. */
 export async function verifyAuthGateToken(
   token: string,
   opts: { jwks: JWTVerifyGetKey; issuer: string; audience: string; subject: string; purpose: string },
@@ -45,6 +45,6 @@ mình: `bff` trả `401` khi đăng nhập và `403 step_up_required` khi step-u
 | `iss` | bằng `AUTHGATE_BASE_URL` của bạn |
 | `aud` | bằng `clientId` của bạn |
 | `exp` | chưa tới (`jose` lo việc này) |
-| `sub` | đúng user bạn đang chờ |
-| `purpose` | đúng thao tác bạn đang chờ (`login`, `change-email`, ...) |
+| `sub` | đúng user bạn mong đợi |
+| `purpose` | đúng thao tác bạn mong đợi (`login`, `change-email`, ...) |
 | `jti` | id duy nhất; lưu lại nếu cần dùng một lần |

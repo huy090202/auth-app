@@ -12,7 +12,7 @@ The stg site URL is printed by `03-deploy.sh` as `BaseUrl`.
 ```
 browser ──► CloudFront (one URL)
               ├─ /api/*   → Lambda Function URL  (bff: Hono, Node 22, arm64)
-              └─ /*       → S3 (SPA: docs + demo; 403/404 → /index.html 200)
+              └─ /*       → S3 (SPA: docs + demo; SPA paths without a dot → /index.html via a CloudFront Function)
 bff ──► DynamoDB auth-app-<stage>          (users)
 bff ──► auth-gate <stage>  /api/...        (x-internal-access-key: client key, from SSM)
 bff ──► auth-gate /.well-known/jwks.json   (cached 300 s) to verify returned tokens
@@ -40,7 +40,7 @@ Open http://localhost:5173. `bff/.env.example` lists the variables.
 Scripts are in `scripts/setup-and-deploy/`, run in this order:
 
 1. `00-deployer.sh` - once: IAM user `auth-app-deployer` (run with an admin profile).
-2. `01-ssm.sh` - once: random session secret and origin-verify value in SSM.
+2. `01-ssm.sh` - once: random session secret and origin-verify value in SSM (a rerun fills only what is missing).
 3. `02-build.sh` - build `bff/dist` and `app/dist`.
 4. `03-deploy.sh` - SAM stack, upload the site, invalidate CloudFront, print `BaseUrl`.
 5. `02-register-client.sh stg` - register with auth-gate; needs the `BaseUrl` from step 4.
@@ -49,15 +49,19 @@ Scripts are in `scripts/setup-and-deploy/`, run in this order:
 
 `99-purge.sh` removes what the scripts created.
 
-Deploy is two passes: the first `03-deploy.sh` has no client id yet, so `/api` returns
-502 until the second pass. `03-deploy.sh` and `02-register-client.sh` need
+Deploy needs the AWS CLI, SAM CLI, `openssl`, `curl` and `jq`, besides Node and pnpm.
+
+Deploy is two passes. On the first pass `/auth-app/stg/authgate-client-key` does not
+exist in SSM yet, so bff's config load throws at cold start and every `/api` call fails
+(502), `/api/health` included, until the second pass. `02-register-client.sh stg` writes
+that key and prints the client id as `AUTHGATE_CLIENT_ID=...`; export it for step 6. `03-deploy.sh` and `02-register-client.sh` need
 `AUTHGATE_BASE_URL`; the register script also needs `AUTHGATE_ADMIN_KEY`.
 
 ## What to copy
 
 If you integrate auth-gate yourself, start from these three files:
 
-- `bff/src/authgate/token.ts` - verify a returned token (signature, `aud`, `purpose`, expiry).
+- `bff/src/authgate/token.ts` - verify a returned token (signature, `iss`, `aud`, `exp`, `sub`, `purpose`).
 - `bff/src/authgate/client.ts` - the calls to auth-gate with the client key.
 - `app/src/lib/webauthn.ts` - base64url and ArrayBuffer conversion for WebAuthn.
 
@@ -66,11 +70,11 @@ If you integrate auth-gate yourself, start from these three files:
 ```
 app/        React 19 + Vite + Mantine SPA: /docs/* and /app/*
 bff/        Hono backend: src/{routes,authgate,users,session,lib}, lambda.ts, server.ts
-docs/       Markdown source of the docs pages: en/*.md, vi/*.md
+docs/       en/, vi/ (docs pages), infra/ (workspace and tooling), superpowers/ (specs, plans)
 infra/      template.yaml (SAM), deployer-policy.json
 scripts/setup-and-deploy/   deploy scripts
 bruno/      Bruno collection against /api
-tools/wt  .claude  docs/infra   worktree tooling
+tools/wt  .claude   worktree tooling
 ```
 
 See `CONTRIBUTING.md` before changing code.

@@ -8,7 +8,7 @@ về `clientId` và `accessKey`. Key chỉ hiện đúng một lần: cất ngay
 Lỡ mất thì rotate bằng `POST /api/clients/{id}/keys`.
 
 `rpId` và `origins` dành cho passkey: domain mà trình duyệt thấy, và chính xác các
-origin phục vụ trang của bạn. Sai một cái là mọi lệnh WebAuthn đều hỏng.
+origin phục vụ trang của bạn. Sai một cái là mọi lời gọi API WebAuthn đều hỏng.
 
 Trong repo này chỉ cần một script:
 

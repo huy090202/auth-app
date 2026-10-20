@@ -18,6 +18,8 @@ env_file="$ROOT/bruno/environments/$STAGE.yml"
 [[ ! -e "$env_file" ]] || die "$env_file exists; move it away so this run cannot clobber it"
 trap 'rm -f "$env_file"' EXIT
 cat >"$env_file" <<YAML
+bundled: false
+extensions: {}
 name: $STAGE
 variables:
   - name: baseUrl
@@ -31,7 +33,7 @@ variables:
 YAML
 
 echo "bruno: $base_url"
-(cd "$ROOT/bruno" && npx -y @usebruno/cli run --env "$STAGE")
+(cd "$ROOT/bruno" && npx -y @usebruno/cli@4.2.1 run --env "$STAGE")
 
 echo "curl: $base_url/docs/step-up"
 headers="$(curl -sS -o /dev/null -D - -w 'status:%{http_code}\n' "$base_url/docs/step-up")"

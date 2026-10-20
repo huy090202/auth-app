@@ -4,7 +4,7 @@ tryIt: /app/login
 ---
 # 2FA sau mật khẩu
 
-Bạn tự kiểm tra mật khẩu. Nếu user có yếu tố thứ hai, cấp một session "nửa vời" chỉ đủ
+Bạn tự kiểm tra mật khẩu. Nếu user có yếu tố thứ hai, cấp một session "tạm" chỉ đủ
 để làm bước tiếp theo, rồi hỏi auth-gate.
 
 ```text
@@ -26,7 +26,7 @@ await verifyLoginToken(v.token, userId);
 await issueSession(c, secret, { userId, mfa: true });
 ```
 
-Bản thân lệnh chuyển tiếp chỉ là một `fetch` kèm client key (`bff/src/authgate/client.ts`):
+Bản thân lời gọi API chuyển tiếp chỉ là một `fetch` kèm client key (`bff/src/authgate/client.ts`):
 
 ```ts
 res = await this.fetchFn(`${this.baseUrl}${path}`, {

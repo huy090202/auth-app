@@ -12,13 +12,13 @@ const keyset = async () => {
   return { privateKey, jwks: createLocalJWKSet({ keys: [jwk] }) };
 };
 
-type Over = { aud?: string; purpose?: string; sub?: string; exp?: number };
+type Over = { iss?: string; aud?: string; purpose?: string; sub?: string; exp?: number };
 
 const mint = (privateKey: CryptoKey, o: Over = {}) => {
   const now = Math.floor(Date.now() / 1000);
   return new SignJWT({ purpose: o.purpose ?? 'transfer', amr: ['pin'], jti: 'ch_1' })
     .setProtectedHeader({ alg: 'ES256', kid: 'k1' })
-    .setIssuer(ISS)
+    .setIssuer(o.iss ?? ISS)
     .setAudience(o.aud ?? AUD)
     .setSubject(o.sub ?? 'u1')
     .setIssuedAt(now - 10)
@@ -70,4 +70,11 @@ test('expired token → rejected', async () => {
   const { privateKey, jwks } = await keyset();
   const past = Math.floor(Date.now() / 1000) - 60;
   await rejects(verifyAuthGateToken(await mint(privateKey, { exp: past }), { jwks, ...expected }));
+});
+
+test('wrong iss → rejected', async () => {
+  const { privateKey, jwks } = await keyset();
+  await rejects(
+    verifyAuthGateToken(await mint(privateKey, { iss: 'https://evil.test' }), { jwks, ...expected }),
+  );
 });

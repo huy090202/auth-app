@@ -44,7 +44,7 @@ EN only; only the docs are bilingual), running auth-gate locally.
 ```
 browser ──► CloudFront (one URL)
               ├─ /api/*   → Lambda Function URL  (bff: Hono, Node 22, arm64)
-              └─ /*       → S3 (SPA: docs + demo; 403/404 → /index.html 200)
+              └─ /*       → S3 (SPA: docs + demo; SPA paths without a dot → /index.html via a CloudFront Function)
 bff ──► DynamoDB auth-app-<stage>          (users)
 bff ──► auth-gate <stage>  /api/...        (x-internal-access-key: client key, from SSM)
 bff ──► auth-gate /.well-known/jwks.json   (cached 300 s) to verify returned tokens
@@ -209,7 +209,7 @@ SAM stack `auth-app-<stage>`:
 |---|---|
 | Lambda `auth-app-<stage>-bff` | Node 22, arm64, Function URL `AuthType: NONE`, checks `x-origin-verify` |
 | S3 bucket + OAC | holds `app/dist`; only CloudFront may read |
-| CloudFront | `/api/*` → Function URL (no cache, all viewer headers except Host); `/*` → S3; S3 403/404 → `/index.html` 200 |
+| CloudFront | `/api/*` → Function URL (no cache, all viewer headers except Host); `/*` → S3; SPA paths without a dot → `/index.html` (CloudFront Function `SpaRewrite`; deviation: no CustomErrorResponses, so real 403/404 from S3 stay visible) |
 | DynamoDB `auth-app-<stage>` | on-demand, pk/sk |
 | SSM parameters | `session-secret`, `origin-verify`, `authgate-client-key` under `/auth-app/<stage>/` |
 

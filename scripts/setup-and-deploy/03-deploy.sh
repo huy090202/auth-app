@@ -35,5 +35,5 @@ echo "invalidated $dist"
 echo "BaseUrl: $(output BaseUrl)"
 echo "RawBffUrl: $(output RawBffUrl)"
 if [[ -z "$client_id" ]]; then
-  echo "AUTHGATE_CLIENT_ID is empty: now run 02-register-client.sh stg and deploy again"
+  echo "AUTHGATE_CLIENT_ID is empty: /api returns 502 until the second pass. Now run 02-register-client.sh stg and deploy again"
 fi

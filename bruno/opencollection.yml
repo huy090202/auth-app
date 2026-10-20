@@ -34,7 +34,7 @@ docs:
     ```bash
     cd bruno/environments
     cp local.example.yml local.yml   # then: pnpm --filter bff dev
-    cd .. && npx -y @usebruno/cli run --env local
+    cd .. && npx -y @usebruno/cli@4.2.1 run --env local
     ```
 
     For stg, `scripts/setup-and-deploy/04-smoke.sh` writes a temporary,

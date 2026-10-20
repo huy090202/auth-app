@@ -25,7 +25,7 @@ export function remoteJwks(baseUrl: string): JWTVerifyGetKey {
   });
 }
 
-/** Verify an auth-gate step-up token. Any failure throws TokenRejectedError. */
+/** Verify an auth-gate token (login or step-up). Any failure throws TokenRejectedError. */
 export async function verifyAuthGateToken(
   token: string,
   opts: { jwks: JWTVerifyGetKey; issuer: string; audience: string; subject: string; purpose: string },

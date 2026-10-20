@@ -7,10 +7,10 @@ tryIt: /app/security
 Người dùng phải có yếu tố trước thì mới challenge được. `subjectId` là id user của bạn;
 chọn thứ gì ổn định, đừng dùng username.
 
-**PIN** chỉ một lệnh: `POST /api/factors/pin` với `{subjectId, pin}`. Gỡ bằng
+**PIN** chỉ một lời gọi API: `POST /api/factors/pin` với `{subjectId, pin}`. Gỡ bằng
 `DELETE /api/factors/pin/{subjectId}`.
 
-**Passkey** cần hai lệnh, trình duyệt đứng giữa:
+**Passkey** cần hai lời gọi API, trình duyệt đứng giữa:
 
 ```text
 browser          backend                       auth-gate

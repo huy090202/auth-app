@@ -1,0 +1,12 @@
+bundled: false
+extensions: {}
+name: stg
+variables:
+  - name: baseUrl
+    value: https://<distribution>.cloudfront.net
+  - name: username
+    value: ""
+  - name: password
+    value: correct-horse-battery
+  - name: pin
+    value: "482916"

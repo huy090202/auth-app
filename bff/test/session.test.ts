@@ -2,6 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { Hono } from 'hono';
 import { AppError, errorHandler, type Vars } from '../src/lib/http.js';
+import { SignJWT } from 'jose';
 import { COOKIE, issueSession } from '../src/session/cookie.js';
 import { requireSession } from '../src/session/middleware.js';
 
@@ -86,5 +87,30 @@ test('issueSession sets HttpOnly; Secure; SameSite=Lax; Path=/ and Max-Age 600 f
     assert.match(raw, /SameSite=Lax/i);
     assert.match(raw, /Path=\//);
     assert.match(raw, new RegExp(`Max-Age=${age}(;|$)`));
+  }
+});
+
+const forge = (claims: Record<string, unknown>, exp: number) =>
+  new SignJWT(claims)
+    .setProtectedHeader({ alg: 'HS256' })
+    .setSubject('u1')
+    .setExpirationTime(exp)
+    .sign(new TextEncoder().encode(SECRET));
+
+test('expired cookie signed with the right secret → 401 unauthorized', async () => {
+  const app = mk();
+  const token = await forge({ mfa: true }, Math.floor(Date.now() / 1000) - 60);
+  const res = await get(app, '/full', `${COOKIE}=${token}`);
+  assert.equal(res.status, 401);
+  assert.equal(((await res.json()) as { error: string }).error, 'unauthorized');
+});
+
+test('non-boolean mfa claim → 401 unauthorized, not a full session', async () => {
+  const app = mk();
+  for (const mfa of ['true', 1, null]) {
+    const token = await forge({ mfa }, Math.floor(Date.now() / 1000) + 600);
+    const res = await get(app, '/full', `${COOKIE}=${token}`);
+    assert.equal(res.status, 401);
+    assert.equal(((await res.json()) as { error: string }).error, 'unauthorized');
   }
 });

@@ -10,8 +10,8 @@ probably want the same:
 |---|---|---|
 | 400 `verification_failed` + `attemptsRemaining` | 400 same, keeps `attemptsRemaining` | "Wrong PIN, N attempts left" |
 | 423 `locked` + `lockedUntil` | 423 same | disable the form, show when it unlocks |
-| 410 `challenge_gone` | 410 same | "Expired, try again", start a new challenge |
-| 404 `factor_not_found` | 409 `factor_not_enrolled` | link to the security page to enroll |
+| 410 `challenge_gone` | 410 same | "Expired, try again", restart automatically |
+| 404 `factor_not_found` | 409 `factor_not_enrolled` | link to `/app/security` to enroll |
 | 400 `registration_failed` | 400 same | "Could not register this passkey" |
 | 5xx or network | 502 `authgate_unavailable` | a generic notice; don't show upstream detail |
 

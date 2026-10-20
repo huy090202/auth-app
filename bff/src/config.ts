@@ -23,7 +23,7 @@ export async function loadConfig(env: Env = process.env): Promise<Config> {
   if (onLambda && !stage) throw new Error('STAGE is required on Lambda');
 
   if (stage && (!clientKey || !sessionSecret || !origin)) {
-    const ssm = new SSMClient({ region: 'ap-southeast-1' });
+    const ssm = new SSMClient({});
     const get = async (name: string): Promise<string> => {
       const r = await ssm.send(
         new GetParameterCommand({ Name: `/auth-app/${stage}/${name}`, WithDecryption: true }),
@@ -40,12 +40,13 @@ export async function loadConfig(env: Env = process.env): Promise<Config> {
   }
 
   if (!sessionSecret) throw new Error('SESSION_SECRET is empty');
+  if (!env.AUTHGATE_BASE_URL) throw new Error('AUTHGATE_BASE_URL is required');
   // On Lambda origin is always set here: env value, or SSM get() which throws on empty.
 
   const cfg: Config = {
     stage,
     table: env.TABLE ?? 'auth-app-local',
-    authGateBaseUrl: env.AUTHGATE_BASE_URL ?? '',
+    authGateBaseUrl: env.AUTHGATE_BASE_URL,
     authGateClientId: env.AUTHGATE_CLIENT_ID ?? '',
     authGateClientKey: clientKey ?? '',
     sessionSecret,

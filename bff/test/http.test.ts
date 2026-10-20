@@ -42,4 +42,5 @@ test('trace is omitted when no auth-gate call was recorded', async () => {
 test('loadConfig throws on empty session secret and incomplete Lambda env', async () => {
   await assert.rejects(loadConfig({}), /SESSION_SECRET/);
   await assert.rejects(loadConfig({ AWS_LAMBDA_FUNCTION_NAME: 'f', SESSION_SECRET: 's' }), /STAGE/);
+  await assert.rejects(loadConfig({ SESSION_SECRET: 's' }), /AUTHGATE_BASE_URL is required/);
 });

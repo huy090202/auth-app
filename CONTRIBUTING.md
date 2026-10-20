@@ -26,8 +26,13 @@ boundary:
 - `bff/test/token.test.ts` - token verification. Readers copy this code; a bug here is a hole on their side.
 - `bff/test/session.test.ts` - an `mfa=false` cookie cannot reach an `mfa=true` route. This is the only 2FA gate.
 - `bff/test/trace.test.ts` - secrets (pin, credential, token, access key) never appear in trace output. Trace is on in a public stage.
+- `bff/test/routes.test.ts` - security behaviour at the route level: no username enumeration, `already_verified`, `invalid_purpose`, step-up token misuse, trace on responses, JSON 404.
+- `bff/test/http.test.ts` - the error envelope (extras cannot override `error` or `trace`; trace only when recorded) and `loadConfig` refusing an incomplete environment.
+- `bff/test/validate.test.ts` - request body validation (username, password, email).
+- `app/src/docs/loader.test.ts` - frontmatter parsing and all eight pages present and titled in both languages.
 - `app/test/webauthn.test.ts` - base64url and ArrayBuffer round trip on real fixtures. Encoding is the most common WebAuthn bug.
 
-`bff` uses `node --test`; `app` uses vitest. Relay routes that only pass data to
-auth-gate have no unit tests: the Bruno collection in `bruno/` and `scripts/setup-and-deploy/04-smoke.sh`
-cover them. Add a test only when it protects one of these two kinds of code.
+`bff` uses `node --test`; `app` uses vitest. The plain relay path (data passed
+through to auth-gate) is also covered end to end by the Bruno collection in `bruno/`
+and `scripts/setup-and-deploy/04-smoke.sh`. Add a test only when it protects code
+readers copy, or a security boundary, including security behaviour at the route level.

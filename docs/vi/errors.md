@@ -10,14 +10,14 @@ bạn cũng muốn làm y vậy:
 |---|---|---|
 | 400 `verification_failed` + `attemptsRemaining` | 400 như cũ, giữ `attemptsRemaining` | "Sai PIN, còn N lần thử" |
 | 423 `locked` + `lockedUntil` | 423 như cũ | khoá form, hiện giờ mở khoá |
-| 410 `challenge_gone` | 410 như cũ | "Hết hạn, thử lại", tạo challenge mới |
-| 404 `factor_not_found` | 409 `factor_not_enrolled` | dẫn tới trang bảo mật để đăng ký |
+| 410 `challenge_gone` | 410 như cũ | "Hết hạn, thử lại", tự động làm lại |
+| 404 `factor_not_found` | 409 `factor_not_enrolled` | dẫn tới `/app/security` để đăng ký |
 | 400 `registration_failed` | 400 như cũ | "Không đăng ký được passkey này" |
 | 5xx hoặc lỗi mạng | 502 `authgate_unavailable` | thông báo chung; đừng lộ chi tiết phía sau |
 
 Vài lưu ý:
 
-- Challenge chỉ dùng một lần và sống ngắn. Gặp `410` thì làm lại từ đầu, đừng gọi lại
+- Challenge chỉ dùng một lần và có thời hạn ngắn. Gặp `410` thì làm lại từ đầu, đừng gọi lại
   verify.
 - `404 factor_not_found` thành `409` vì với user, server không thiếu gì cả; chỉ là họ
   chưa cài yếu tố đó.

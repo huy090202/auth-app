@@ -33,6 +33,15 @@ Resources:
         - { AttributeName: pk, KeyType: HASH }
         - { AttributeName: sk, KeyType: RANGE }
 
+  # SAM adds lambda:InvokeFunctionUrl for the public URL; newer accounts also
+  # require lambda:InvokeFunction for an AuthType NONE Function URL.
+  BffUrlInvokePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref Bff
+      Principal: "*"
+
   Bff:
     Type: AWS::Serverless::Function
     Properties:

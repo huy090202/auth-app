@@ -25,7 +25,7 @@ function PinSection({ me, reload }: { me: Me; reload: () => Promise<void> }) {
       setAgain('');
       await reload();
     } catch (e) {
-      setError(e instanceof ApiError && e.code === 'invalid_pin' ? 'auth-gate rejected that PIN.' : describe(e));
+      setError(e instanceof ApiError && (e.code === 'pin_rejected' || e.code === 'invalid_pin') ? 'auth-gate rejected that PIN.' : describe(e));
     } finally {
       setBusy(false);
     }
