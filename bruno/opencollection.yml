@@ -1,0 +1,49 @@
+opencollection: 1.0.0
+
+info:
+  name: "auth-app (sample client of auth-gate)"
+
+request:
+  scripts:
+    - type: before-request
+      code: |-
+        // A fresh username per run, so reruns never collide on /register.
+        // Set `username` in the environment to pin one.
+        if (!bru.getEnvVar("username") && !bru.getVar("username")) {
+          const rand = Math.random().toString(36).slice(2, 10);
+          bru.setVar("username", "smoke-" + rand);
+        }
+
+docs:
+  content: |-
+    ## auth-app
+
+    The sample client of auth-gate. The browser calls same-origin `/api`; only
+    `bff` talks to auth-gate. This collection plays the browser: it calls
+    `{{baseUrl}}/api/...` and nothing else. The session is a cookie, kept by
+    Bruno's cookie jar.
+
+    ### Variables
+
+    - From the environment: `baseUrl`, `username`, `password`, `pin`.
+    - `username` is generated (`smoke-<random>`) when empty.
+    - Captured at run time: `challengeId`, `stepUpToken`.
+
+    ### Environments
+
+    ```bash
+    cd bruno/environments
+    cp local.example.yml local.yml   # then: pnpm --filter bff dev
+    cd .. && npx -y @usebruno/cli run --env local
+    ```
+
+    For stg, `scripts/setup-and-deploy/04-smoke.sh` writes a temporary,
+    gitignored `stg.yml` from the stack outputs, runs this collection, then
+    deletes it. Real environment files are gitignored.
+
+    ### Order matters
+
+    Run the folders in order: one user is registered, signs in, sets a PIN, steps
+    up to change email, signs in again through the second factor, and removes the
+    PIN. The PIN path needs no browser; passkeys do, so they are not here.
+  type: text/markdown

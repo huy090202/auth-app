@@ -1,0 +1,11 @@
+info:
+  name: Step-up
+  type: folder
+  seq: 3
+
+request: {}
+
+docs:
+  content: |-
+    Re-prove the PIN for a sensitive purpose (change-email), then use the one-shot step-up token.
+  type: text/markdown

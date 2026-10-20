@@ -1,0 +1,11 @@
+info:
+  name: Second factor
+  type: folder
+  seq: 4
+
+request: {}
+
+docs:
+  content: |-
+    Sign in again, now that a PIN exists: password gives a half session, the PIN completes it.
+  type: text/markdown

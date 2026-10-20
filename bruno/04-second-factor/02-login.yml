@@ -1,0 +1,35 @@
+info:
+  name: "Log in again: second factor required"
+  type: http
+  seq: 2
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/auth/login"
+  headers:
+    - name: Content-Type
+      value: "application/json"
+  body:
+    type: json
+    data: |-
+      { "username": "{{username}}", "password": "{{password}}" }
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("200 - second factor required", function() {
+          expect(res.getStatus()).to.equal(200);
+          expect(res.getBody().next).to.equal("second-factor");
+          expect(res.getBody().factors.pin).to.equal(true);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  The password is right but a PIN exists, so the session is only half-open.
+  **Expected: 200 `{next: "second-factor", factors: {pin: true, webauthn: false}}`.**

@@ -1,0 +1,35 @@
+info:
+  name: "Log in"
+  type: http
+  seq: 3
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/auth/login"
+  headers:
+    - name: Content-Type
+      value: "application/json"
+  body:
+    type: json
+    data: |-
+      { "username": "{{username}}", "password": "{{password}}" }
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("200 - no second factor yet, so done", function() {
+          expect(res.getStatus()).to.equal(200);
+          expect(res.getBody().next).to.equal("done");
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  Checks the password, then asks auth-gate which factors the user has. None yet, so
+  the session is full at once and the `session` cookie is set (kept by the cookie jar).
+  **Expected: 200 `{next: "done"}`.**
