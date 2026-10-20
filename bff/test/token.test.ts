@@ -1,8 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { SignJWT, createLocalJWKSet, exportJWK, generateKeyPair, type JWK } from 'jose';
-import { AppError } from '../src/lib/http.js';
-import { verifyAuthGateToken } from '../src/authgate/token.js';
+import { TokenRejectedError, verifyAuthGateToken } from '../src/authgate/token.js';
 
 const ISS = 'https://ag.test';
 const AUD = 'cl_1';
@@ -30,7 +29,7 @@ const mint = (privateKey: CryptoKey, o: Over = {}) => {
 const expected = { issuer: ISS, audience: AUD, subject: 'u1', purpose: 'transfer' };
 
 const rejects = async (p: Promise<unknown>) =>
-  assert.rejects(p, (e) => e instanceof AppError && e.status === 403 && e.code === 'step_up_required');
+  assert.rejects(p, (e) => e instanceof TokenRejectedError);
 
 test('valid token returns its claims', async () => {
   const { privateKey, jwks } = await keyset();
@@ -44,30 +43,30 @@ test('valid token returns its claims', async () => {
   assert.equal(typeof claims.exp, 'number');
 });
 
-test('token signed by another key → 403 step_up_required', async () => {
+test('token signed by another key → rejected', async () => {
   const { jwks } = await keyset();
   const other = await keyset();
   await rejects(verifyAuthGateToken(await mint(other.privateKey), { jwks, ...expected }));
 });
 
-test('wrong aud → 403', async () => {
+test('wrong aud → rejected', async () => {
   const { privateKey, jwks } = await keyset();
   await rejects(verifyAuthGateToken(await mint(privateKey, { aud: 'cl_2' }), { jwks, ...expected }));
 });
 
-test('wrong purpose → 403', async () => {
+test('wrong purpose → rejected', async () => {
   const { privateKey, jwks } = await keyset();
   await rejects(
     verifyAuthGateToken(await mint(privateKey, { purpose: 'change-email' }), { jwks, ...expected }),
   );
 });
 
-test('wrong sub → 403', async () => {
+test('wrong sub → rejected', async () => {
   const { privateKey, jwks } = await keyset();
   await rejects(verifyAuthGateToken(await mint(privateKey, { sub: 'u2' }), { jwks, ...expected }));
 });
 
-test('expired token → 403', async () => {
+test('expired token → rejected', async () => {
   const { privateKey, jwks } = await keyset();
   const past = Math.floor(Date.now() / 1000) - 60;
   await rejects(verifyAuthGateToken(await mint(privateKey, { exp: past }), { jwks, ...expected }));

@@ -1,5 +1,4 @@
 import { createRemoteJWKSet, jwtVerify, type JWTVerifyGetKey } from 'jose';
-import { AppError } from '../lib/http.js';
 
 export type AuthGateClaims = {
   iss: string;
@@ -11,6 +10,14 @@ export type AuthGateClaims = {
   exp: number;
 };
 
+/** Thrown on any verification failure; callers map it to their own error. */
+export class TokenRejectedError extends Error {
+  constructor() {
+    super('token rejected');
+    this.name = 'TokenRejectedError';
+  }
+}
+
 export function remoteJwks(baseUrl: string): JWTVerifyGetKey {
   return createRemoteJWKSet(new URL('/.well-known/jwks.json', baseUrl), {
     cooldownDuration: 300_000,
@@ -18,7 +25,7 @@ export function remoteJwks(baseUrl: string): JWTVerifyGetKey {
   });
 }
 
-/** Verify an auth-gate step-up token. Any failure is a 403 step_up_required. */
+/** Verify an auth-gate step-up token. Any failure throws TokenRejectedError. */
 export async function verifyAuthGateToken(
   token: string,
   opts: { jwks: JWTVerifyGetKey; issuer: string; audience: string; subject: string; purpose: string },
@@ -34,6 +41,6 @@ export async function verifyAuthGateToken(
     }
     return payload as unknown as AuthGateClaims;
   } catch {
-    throw new AppError(403, 'step_up_required');
+    throw new TokenRejectedError();
   }
 }
