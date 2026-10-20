@@ -16,7 +16,7 @@ export class AppError extends Error {
 
 function withTrace(c: Ctx, body: object): object {
   const trace = c.var.trace?.entries();
-  return trace ? { ...body, trace } : body;
+  return trace && trace.length > 0 ? { ...body, trace } : body;
 }
 
 export function jsonOk(c: Ctx, status: 200 | 201, body: object): Response {
@@ -25,7 +25,7 @@ export function jsonOk(c: Ctx, status: 200 | 201, body: object): Response {
 
 export function jsonError(c: Ctx, err: AppError): Response {
   return c.json(
-    withTrace(c, { error: err.code, ...err.extras }),
+    withTrace(c, { ...err.extras, error: err.code }),
     err.status as 400 | 401 | 403 | 404 | 409 | 429 | 500 | 502,
   );
 }

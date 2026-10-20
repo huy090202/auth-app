@@ -19,6 +19,8 @@ export async function loadConfig(env: Env = process.env): Promise<Config> {
   let clientKey = env.AUTHGATE_CLIENT_KEY;
   let sessionSecret = env.SESSION_SECRET;
   let origin = env.ORIGIN_VERIFY;
+  const onLambda = Boolean(env.AWS_LAMBDA_FUNCTION_NAME);
+  if (onLambda && !stage) throw new Error('STAGE is required on Lambda');
 
   if (stage && (!clientKey || !sessionSecret || !origin)) {
     const ssm = new SSMClient({ region: 'ap-southeast-1' });
@@ -37,13 +39,16 @@ export async function loadConfig(env: Env = process.env): Promise<Config> {
     ]);
   }
 
+  if (!sessionSecret) throw new Error('SESSION_SECRET is empty');
+  if (onLambda && !origin) throw new Error('ORIGIN_VERIFY is required on Lambda');
+
   const cfg: Config = {
     stage,
     table: env.TABLE ?? 'auth-app-local',
     authGateBaseUrl: env.AUTHGATE_BASE_URL ?? '',
     authGateClientId: env.AUTHGATE_CLIENT_ID ?? '',
     authGateClientKey: clientKey ?? '',
-    sessionSecret: sessionSecret ?? '',
+    sessionSecret,
     originVerify: origin || null,
     trace: env.TRACE === '1',
   };
