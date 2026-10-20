@@ -80,26 +80,31 @@ export class DynamoUserStore implements UserStore {
         }),
       );
     } catch (e) {
-      if (e instanceof TransactionCanceledException) throw new AppError(409, 'username_taken');
+      if (
+        e instanceof TransactionCanceledException &&
+        e.CancellationReasons?.some((r) => r.Code === 'ConditionalCheckFailed')
+      ) {
+        throw new AppError(409, 'username_taken');
+      }
       throw e;
     }
   }
 
   async getByUsername(username: string): Promise<User | null> {
-    const r = await this.doc.send(new GetCommand({ TableName: this.table, Key: userKey(username) }));
+    const r = await this.doc.send(new GetCommand({ TableName: this.table, Key: userKey(username), ConsistentRead: true }));
     if (!r.Item) return null;
     const { userId, email, passwordHash, createdAt } = r.Item as Omit<User, 'username'>;
     return { userId, username, email, passwordHash, createdAt };
   }
 
   async getById(userId: string): Promise<User | null> {
-    const r = await this.doc.send(new GetCommand({ TableName: this.table, Key: idKey(userId) }));
+    const r = await this.doc.send(new GetCommand({ TableName: this.table, Key: idKey(userId), ConsistentRead: true }));
     const username = (r.Item as { username?: string } | undefined)?.username;
     return username ? this.getByUsername(username) : null;
   }
 
   async updateEmail(userId: string, email: string): Promise<void> {
-    const r = await this.doc.send(new GetCommand({ TableName: this.table, Key: idKey(userId) }));
+    const r = await this.doc.send(new GetCommand({ TableName: this.table, Key: idKey(userId), ConsistentRead: true }));
     const username = (r.Item as { username?: string } | undefined)?.username;
     if (!username) return;
     await this.doc.send(
