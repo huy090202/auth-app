@@ -66,7 +66,8 @@ access_key="$(jq -r '.accessKey // empty' "$tmpdir/resp")"
 [[ -n "$client_id" && -n "$access_key" ]] || die "unexpected response from auth-gate"
 
 if [[ "$target" == local ]]; then
-  touch "$env_file"
+  # A fresh .env starts from the example so PORT, TABLE, SESSION_SECRET etc. are set.
+  [[ -f "$env_file" ]] || cp "$ROOT/bff/.env.example" "$env_file"
   tmp="$(mktemp)"
   grep -Ev '^(AUTHGATE_CLIENT_ID|AUTHGATE_CLIENT_KEY|AUTHGATE_BASE_URL)=' "$env_file" >"$tmp" || true
   {
