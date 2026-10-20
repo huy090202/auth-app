@@ -1,12 +1,6 @@
-import { Navigate, Route, Routes, useParams } from 'react-router';
-import { Title } from '@mantine/core';
+import { Navigate, Route, Routes } from 'react-router';
 import { DemoRoutes } from './app';
-
-// Placeholder: Task 8 fills /docs/:page.
-function DocsPage() {
-  const { page } = useParams();
-  return <Title order={1}>{page}</Title>;
-}
+import { DocsPage } from './docs/DocsPage';
 
 export function AppRoutes() {
   return (

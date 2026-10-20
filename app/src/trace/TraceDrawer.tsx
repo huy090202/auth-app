@@ -1,5 +1,6 @@
 import { Affix, Badge, Box, Button, Code, Collapse, Drawer, Group, Stack, Text, UnstyledButton } from '@mantine/core';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useLocation } from 'react-router';
 import { monoFont } from '../theme';
 import { traceStore, useTrace, type TraceEntry } from './TraceStore';
 
@@ -47,6 +48,11 @@ const openedFromUrl = () => new URLSearchParams(window.location.search).get('tra
 export function TraceDrawer() {
   const entries = useTrace();
   const [opened, setOpened] = useState(openedFromUrl);
+  // "Try it" in the docs is a client-side navigation, so watch the URL too.
+  const { search } = useLocation();
+  useEffect(() => {
+    if (new URLSearchParams(search).get('trace') === '1') setOpened(true);
+  }, [search]);
   return (
     <>
       <Affix position={{ bottom: 16, right: 16 }}>
