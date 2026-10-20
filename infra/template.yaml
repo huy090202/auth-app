@@ -41,6 +41,7 @@ Resources:
       Action: lambda:InvokeFunction
       FunctionName: !Ref Bff
       Principal: "*"
+      InvokedViaFunctionUrl: true
 
   Bff:
     Type: AWS::Serverless::Function
