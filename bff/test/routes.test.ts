@@ -126,6 +126,9 @@ test('login unknown username → 401 invalid_credentials with no next', async ()
   const wrong = await login(h, 'alice', 'wrong password');
   assert.equal(wrong.status, 401);
   assert.deepEqual(wrong.json, r.json);
+  const malformed = await login(h, 'x'.repeat(500));
+  assert.equal(malformed.status, 401);
+  assert.deepEqual(malformed.json, r.json);
   assert.equal(h.calls.length, 0);
 });
 
@@ -177,10 +180,12 @@ test('passkey/start unknown username and user without passkeys → same 409 fact
   noFactors(h);
   const known = await call(h, 'POST', '/api/auth/passkey/start', { username: 'alice' });
   const unknown = await call(h, 'POST', '/api/auth/passkey/start', { username: 'nobody' });
-  assert.equal(known.status, 409);
-  assert.equal(unknown.status, 409);
-  assert.equal(known.json.error, 'factor_not_enrolled');
-  assert.equal(unknown.json.error, 'factor_not_enrolled');
+  const malformed = await call(h, 'POST', '/api/auth/passkey/start', { username: 'x'.repeat(500) });
+  assert.equal(config.trace, true);
+  for (const r of [known, unknown, malformed]) {
+    assert.equal(r.status, 409);
+    assert.deepEqual(r.json, { error: 'factor_not_enrolled' });
+  }
 });
 
 test('stepup/start purpose delete-account → 400 invalid_purpose and the fake auth-gate was not called', async () => {

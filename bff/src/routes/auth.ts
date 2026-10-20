@@ -20,6 +20,15 @@ function ulid(now = Date.now()): string {
   return time + rand;
 }
 
+/** A well-formed username, or null: malformed ones take the same path as unknown ones. */
+function tryUsername(v: unknown): string | null {
+  try {
+    return parseUsername(v);
+  } catch {
+    return null;
+  }
+}
+
 export function authRoutes(deps: Deps): Hono<{ Variables: SessionVars }> {
   const { config, users, authGate, jwks } = deps;
   const secret = config.sessionSecret;
@@ -58,7 +67,7 @@ export function authRoutes(deps: Deps): Hono<{ Variables: SessionVars }> {
 
   r.post('/login', async (c) => {
     const b = await readBody(c);
-    const username = typeof b.username === 'string' ? b.username.toLowerCase() : '';
+    const username = tryUsername(b.username);
     const password = typeof b.password === 'string' ? b.password : '';
     const user = username ? await users.getByUsername(username) : null;
     // Always run scrypt, so an unknown username costs the same as a wrong password.
@@ -95,12 +104,14 @@ export function authRoutes(deps: Deps): Hono<{ Variables: SessionVars }> {
 
   r.post('/passkey/start', async (c) => {
     const b = await readBody(c);
-    const username = typeof b.username === 'string' ? b.username.toLowerCase() : '';
+    const username = tryUsername(b.username);
     const user = username ? await users.getByUsername(username) : null;
-    // Unknown user and user without passkeys answer the same, so usernames cannot be probed.
-    if (!user) throw new AppError(409, 'factor_not_enrolled');
+    // Unknown user and user without passkeys get byte-identical bodies, so usernames
+    // cannot be probed. Built directly, never via jsonError: no `trace` key.
+    const notEnrolled = () => c.json({ error: 'factor_not_enrolled' }, 409);
+    if (!user) return notEnrolled();
     const f = await authGate.factors(c.var.trace, user.userId);
-    if (f.webauthn.length === 0) throw new AppError(409, 'factor_not_enrolled');
+    if (f.webauthn.length === 0) return notEnrolled();
     const ch = await authGate.createChallenge(c.var.trace, user.userId, 'login', 'webauthn');
     return jsonOk(c, 200, ch);
   });
