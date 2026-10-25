@@ -3,8 +3,8 @@ title: AuthGate là gì
 ---
 # AuthGate là gì
 
-AuthGate lo bước xác thực yếu tố thứ hai (PIN hoặc passkey) cho user của bạn, tức phần
-thứ hai của xác thực 2 yếu tố (2FA). Backend của bạn mở một challenge, chuyển câu trả lời của user sang AuthGate, và nhận về một token
+AuthGate lo phần yếu tố thứ hai trong xác thực 2 yếu tố (2FA): PIN hoặc passkey.
+Backend của bạn mở một challenge, chuyển câu trả lời của user sang AuthGate, và nhận về một token
 có hạn ngắn, ký sẵn, xác nhận rằng "user này vừa qua PIN/passkey cho đúng việc này".
 Bạn verify token đó rồi tự quyết cho user làm gì tiếp.
 
