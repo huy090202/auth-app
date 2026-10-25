@@ -33,7 +33,7 @@ variables:
 YAML
 
 echo "bruno: $base_url"
-(cd "$ROOT/bruno" && npx -y @usebruno/cli@4.2.1 run --env "$STAGE")
+(cd "$ROOT/bruno" && pnpm exec bru run --env "$STAGE")
 
 echo "curl: $base_url/docs/step-up"
 headers="$(curl -sS -o /dev/null -D - -w 'status:%{http_code}\n' "$base_url/docs/step-up")"

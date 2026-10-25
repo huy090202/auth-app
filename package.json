@@ -10,9 +10,11 @@
     "test": "bash tools/wt/test/hooks.sh && bash tools/wt/test/e2e.sh && pnpm -r test",
     "typecheck": "pnpm -r typecheck",
     "build": "pnpm -r build",
-    "check": "pnpm run lint && pnpm run typecheck && pnpm run test && pnpm run build"
+    "check": "pnpm run lint && pnpm run typecheck && pnpm run test && pnpm run build",
+    "bruno:local": "cd bruno && bru run --env local"
   },
   "devDependencies": {
+    "@usebruno/cli": "4.2.1",
     "shellcheck": "^4.1.0"
   }
 }

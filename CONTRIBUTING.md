@@ -34,5 +34,7 @@ boundary:
 
 `bff` uses `node --test`; `app` uses vitest. The plain relay path (data passed
 through to auth-gate) is also covered end to end by the Bruno collection in `bruno/`
-and `scripts/setup-and-deploy/04-smoke.sh`. Add a test only when it protects code
+and `scripts/setup-and-deploy/04-smoke.sh`. Run it locally against
+`bff` on :8787 with `pnpm run bruno:local` (the pinned `@usebruno/cli` devDependency;
+`bru run` needs cwd `bruno/`, and `npx @usebruno/cli` can hang, so do not use it). Add a test only when it protects code
 readers copy, or a security boundary, including security behaviour at the route level.
