@@ -1,77 +1,73 @@
 import { createTheme, type MantineColorsTuple } from '@mantine/core';
 
 /*
- * Design direction (impeccable, one pass). Mode: Read for /docs, Operate for /app.
+ * Design direction (impeccable redesign). Mode: Read for /docs, Operate for /app.
  *
- * "Engineering notebook": the page reads like a well-kept lab notebook a backend
- * engineer would hand a colleague. Warm paper, ink-black text, one accent. No hero,
- * no gradients, no emoji, no shadows beyond a 1px rule. Structure comes from rules
- * and spacing, not cards.
+ * "Canopy": a quiet forest floor seen through frosted glass. The page sits on a
+ * still background of soft green/teal light (blurred leaf shapes plus a faint grain),
+ * and every surface that carries text is a translucent glass panel dense enough to
+ * keep body text at WCAG AA. Brand element is Wood, so the one accent is a deep
+ * leaf green. Red is reserved for errors and destructive actions.
  *
  * Palette tokens
- *   paper   light #f7f5f0  dark #16161a   page background
- *   ink     light #1c1b19  dark #e8e6e1   body text
- *   muted   light #6b675f  dark #9a968e   secondary text, trace timings
- *   rule    light #dedad1  dark #2c2c31   1px dividers and borders
- *   accent  `signal` (vermilion, #c2410c at shade 7): links, primary buttons, the trace
- *           count badge. Nothing else is colored. Status in the trace uses Mantine
- *           green/red at low saturation only for the status code itself.
+ *   bg      light #eef4f0  dark #0b1411   page background under the blobs
+ *   ink     light #12201a  dark #e3ece7   body text
+ *   muted   light #4b5d54  dark #9db3a8   secondary text (>= 5.5:1 on glass)
+ *   rule    light #cfdcd5  dark #22332c   1px dividers
+ *   glass   light rgba(255,255,255,.72)  dark rgba(14,26,21,.72), blur 18px saturate 140%
+ *   accent  `canopy`, shade 7 #0b7041: links, primary buttons, active nav, trace badge.
+ *           White on shade 7 is ~6.2:1. Dark-scheme links use shade 3 #6ee0a0 (~10:1).
  *
- * Type scale (rem, ratio ~1.2, body 1rem/1.6)
- *   h1 1.75 / h2 1.4 / h3 1.15 / body 1 / small 0.875 / trace 0.8125
- *   Sans: the system UI stack (no web font to load). Mono: ui-monospace stack, used
- *   for all code, inline identifiers and the whole trace panel.
- *
- * Spacing: 4px base; xs 4, sm 8, md 16, lg 24, xl 40. Reading column max 72ch.
- * Radius: 4px small and quiet; buttons are not pills.
+ * Type: Plus Jakarta Sans Variable (UI and prose; has a Vietnamese subset), JetBrains Mono Variable (code and trace only).
+ *   h1 2.25 / h2 1.5 / h3 1.2 / body 1.0625 (17px) / line-height 1.7 for prose.
+ * Layout: header 60px; sidebar 248px; prose column max 760px inside a main column
+ *   of up to 960px where code blocks may use the full width; TOC 208px from 1200px, only when the page has h2/h3.
+ * Radius: 10px panels, 8px controls.
  */
 
-const signal: MantineColorsTuple = [
-  '#fff4ed', '#ffe6d5', '#fdc9aa', '#fba574', '#f97a3c', '#ea5a14', '#d24a0e', '#c2410c', '#9a3412', '#7c2d12',
+export const canopy: MantineColorsTuple = [
+  '#ecfdf3', '#d1fadf', '#a6f0c3', '#6ee0a0', '#36c87a', '#16a35f', '#0f8a4f', '#0b7041', '#095a36', '#06402a',
 ];
 
-export const tokens = {
-  light: { paper: '#f7f5f0', ink: '#1c1b19', muted: '#6b675f', rule: '#dedad1' },
-  dark: { paper: '#16161a', ink: '#e8e6e1', muted: '#9a968e', rule: '#2c2c31' },
-};
-
-export const monoFont = 'ui-monospace, SFMono-Regular, "JetBrains Mono", Menlo, Consolas, monospace';
+export const sansFont = '"Plus Jakarta Sans Variable", system-ui, -apple-system, "Segoe UI", sans-serif';
+export const monoFont = '"JetBrains Mono Variable", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace';
 
 export const theme = createTheme({
-  primaryColor: 'signal',
-  // Shade 7 in both schemes: white on #c2410c is ~5.2:1 (shade 5 was ~3.4:1).
+  primaryColor: 'canopy',
   primaryShade: { light: 7, dark: 7 },
-  colors: { signal },
-  fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif',
+  colors: { canopy },
+  fontFamily: sansFont,
   fontFamilyMonospace: monoFont,
-  defaultRadius: 'sm',
-  radius: { xs: '2px', sm: '4px', md: '6px', lg: '8px', xl: '12px' },
+  defaultRadius: 'md',
+  radius: { xs: '4px', sm: '6px', md: '8px', lg: '10px', xl: '16px' },
   spacing: { xs: '4px', sm: '8px', md: '16px', lg: '24px', xl: '40px' },
   headings: {
-    fontWeight: '600',
+    fontFamily: sansFont,
+    fontWeight: '650',
     sizes: {
-      h1: { fontSize: '1.75rem', lineHeight: '1.25' },
-      h2: { fontSize: '1.4rem', lineHeight: '1.3' },
-      h3: { fontSize: '1.15rem', lineHeight: '1.35' },
+      h1: { fontSize: '2.25rem', lineHeight: '1.15' },
+      h2: { fontSize: '1.5rem', lineHeight: '1.25' },
+      h3: { fontSize: '1.2rem', lineHeight: '1.35' },
     },
   },
-  fontSizes: { xs: '0.8125rem', sm: '0.875rem', md: '1rem', lg: '1.125rem', xl: '1.25rem' },
+  fontSizes: { xs: '0.8125rem', sm: '0.875rem', md: '1rem', lg: '1.0625rem', xl: '1.25rem' },
   lineHeights: { md: '1.6' },
 });
 
-// Paper/ink/rule as CSS variables so both schemes are set in one place.
 export const cssVariablesResolver = () => ({
   variables: {},
   light: {
-    '--mantine-color-body': tokens.light.paper,
-    '--mantine-color-text': tokens.light.ink,
-    '--mantine-color-dimmed': tokens.light.muted,
-    '--mantine-color-default-border': tokens.light.rule,
+    '--mantine-color-body': '#eef4f0',
+    '--mantine-color-text': '#12201a',
+    '--mantine-color-dimmed': '#4b5d54',
+    '--mantine-color-default-border': '#cfdcd5',
+    '--mantine-color-anchor': canopy[7],
   },
   dark: {
-    '--mantine-color-body': tokens.dark.paper,
-    '--mantine-color-text': tokens.dark.ink,
-    '--mantine-color-dimmed': tokens.dark.muted,
-    '--mantine-color-default-border': tokens.dark.rule,
+    '--mantine-color-body': '#0b1411',
+    '--mantine-color-text': '#e3ece7',
+    '--mantine-color-dimmed': '#9db3a8',
+    '--mantine-color-default-border': '#22332c',
+    '--mantine-color-anchor': canopy[3],
   },
 });

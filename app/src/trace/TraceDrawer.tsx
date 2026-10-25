@@ -56,12 +56,14 @@ export function TraceDrawer() {
   return (
     <>
       <Affix position={{ bottom: 16, right: 16 }}>
-        <Button variant="default" ff={monoFont} onClick={() => setOpened(true)}
+        <Button variant="default" className="trace-fab glass" ff={monoFont} onClick={() => setOpened(true)}
           rightSection={<Badge size="sm" circle={entries.length < 10}>{entries.length}</Badge>}>
           trace
         </Button>
       </Affix>
       <Drawer opened={opened} onClose={() => setOpened(false)} position="right" size="lg"
+        classNames={{ content: 'trace-drawer', header: 'trace-drawer-header' }}
+        overlayProps={{ backgroundOpacity: 0.25, blur: 2 }}
         title={<Text ff={monoFont} fw={600}>auth-gate calls</Text>}>
         <Group mb="sm">
           <Button size="xs" variant="default" onClick={() => traceStore.clear()} disabled={!entries.length}>Clear</Button>
@@ -72,7 +74,7 @@ export function TraceDrawer() {
         </Group>
         {entries.length === 0 ? (
           <Text c="dimmed" fz="sm">
-            Nothing yet. Every call the backend makes to auth-gate shows up here.
+            Nothing yet. Every call the backend makes to AuthGate shows up here.
           </Text>
         ) : (
           entries.map((e, i) => <Entry key={i} e={e} />)
