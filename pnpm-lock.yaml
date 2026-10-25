@@ -17,12 +17,21 @@ importers:
 
   app:
     dependencies:
+      '@fontsource-variable/jetbrains-mono':
+        specifier: ^5.3.0
+        version: 5.3.0
+      '@fontsource-variable/plus-jakarta-sans':
+        specifier: ^5.3.0
+        version: 5.3.0
       '@mantine/core':
         specifier: ^7.17.8
         version: 7.17.8(@mantine/hooks@7.17.8(react@19.3.1))(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
       '@mantine/hooks':
         specifier: ^7.17.8
         version: 7.17.8(react@19.3.1)
+      highlight.js:
+        specifier: ^11.12.0
+        version: 11.12.0
       marked:
         specifier: ^18.1.1
         version: 18.1.1
@@ -963,6 +972,12 @@ packages:
 
   '@floating-ui/utils@0.2.12':
     resolution: {integrity: sha512-HpCo8tmWzLVad5s2d19EhAz5zqrrQ6s69qd6moPMQvkOuSwDT1YgRfWSVuc4ennqrgv3OHppiOGMQ7oC13yIww==}
+
+  '@fontsource-variable/jetbrains-mono@5.3.0':
+    resolution: {integrity: sha512-F32xpS2NsGYoQi2ADSkKTgpJj7ozajsGgDJ8woTnqjmIB+dxDIqImjl4pXZVEExu8UFZ2ndhmX18EBS/hdz3Lw==}
+
+  '@fontsource-variable/plus-jakarta-sans@5.3.0':
+    resolution: {integrity: sha512-/l/4r0yyWK9JzAlmA0LiYgGgmJe/Gswt4jTJEzr5QhJfwMbvJZDmYWyW0M4X7yCK69BajMVlV/Lx8g7WDc1+sw==}
 
   '@google-cloud/secret-manager@6.3.0':
     resolution: {integrity: sha512-TUuzu8CchbCd2cXd0pYJSXvDBsEVX3wpZu4iOpdLrXLbYbvCDKhdjDyOyC7vo14qQRE9J6Z0AL2hfX08H+fh3A==}
@@ -2410,6 +2425,10 @@ packages:
   hasown@2.0.4:
     resolution: {integrity: sha512-T2UbfbBEF32wiepXIsMlTW9+dDYC6wMh/t/vYA4tuOMKqWz/n3vr1NFSxQiyP+zk2mXsoMA/i/7qV6LKut1t1A==}
     engines: {node: '>= 0.4'}
+
+  highlight.js@11.12.0:
+    resolution: {integrity: sha512-nbfWpyRMcMrPMmDwJB+dhX/eiaPKtc2RB+0QZskqJ3WjRA/FDS0e9hZrx8EC/lbEv8gXy98FcDbNa/dspAaJMg==}
+    engines: {node: '>=12.0.0'}
 
   hono@4.13.13:
     resolution: {integrity: sha512-CQ46U0ZkAGmbT/4UxdzzGJpacP2IeKgY4a5/tOI9AABbpOMfK739wfDXmv1usCk+3RkKj1hQy4/fjhiwa2xlrA==}
@@ -4945,6 +4964,10 @@ snapshots:
 
   '@floating-ui/utils@0.2.12': {}
 
+  '@fontsource-variable/jetbrains-mono@5.3.0': {}
+
+  '@fontsource-variable/plus-jakarta-sans@5.3.0': {}
+
   '@google-cloud/secret-manager@6.3.0':
     dependencies:
       google-gax: 5.0.8
@@ -5514,7 +5537,7 @@ snapshots:
       '@usebruno/js': 0.54.0(debug@4.4.3)
       '@usebruno/lang': 0.40.0
       '@usebruno/requests': 0.21.0
-      aws4-axios: 3.4.0(axios@1.18.0(debug@4.4.3))
+      aws4-axios: 3.4.0(axios@1.18.0)
       axios: 1.18.0(debug@4.4.3)
       axios-ntlm: 1.4.6(debug@4.4.3)
       chai: 4.5.0
@@ -5785,7 +5808,7 @@ snapshots:
     dependencies:
       possible-typed-array-names: 1.1.0
 
-  aws4-axios@3.4.0(axios@1.18.0(debug@4.4.3)):
+  aws4-axios@3.4.0(axios@1.18.0):
     dependencies:
       '@aws-sdk/client-sts': 3.1156.0
       aws4: 1.13.2
@@ -6692,6 +6715,8 @@ snapshots:
   hasown@2.0.4:
     dependencies:
       function-bind: 1.1.2
+
+  highlight.js@11.12.0: {}
 
   hono@4.13.13: {}
 
