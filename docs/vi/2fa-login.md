@@ -5,7 +5,7 @@ tryIt: /app/login
 # 2FA sau mật khẩu
 
 Bạn tự kiểm tra mật khẩu. Nếu user có yếu tố thứ hai, cấp một session "tạm" chỉ đủ
-để làm bước tiếp theo, rồi hỏi auth-gate.
+để làm bước tiếp theo, rồi hỏi AuthGate.
 
 ```text
 browser            backend                          auth-gate

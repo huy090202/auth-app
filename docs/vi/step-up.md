@@ -32,7 +32,7 @@ await verifyAuthGateToken(typeof b.stepUpToken === 'string' ? b.stepUpToken : ''
 ```
 
 Chỉ mở step-up cho những purpose bạn biết trước (`bff` giữ một allow-list), để purpose
-bịa ra không bao giờ tới được auth-gate.
+bịa ra không bao giờ tới được AuthGate.
 
 Ở v1, token bị dùng lại vẫn được chấp nhận cho tới `exp`. Nếu điều đó quan trọng với
 bạn, hãy lưu `jti` và từ chối token đã thấy rồi.

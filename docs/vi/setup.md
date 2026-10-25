@@ -3,7 +3,7 @@ title: Đăng ký backend
 ---
 # Đăng ký backend
 
-Backend của bạn là một *client* của auth-gate. Đăng ký một lần bằng admin key, bạn nhận
+Backend của bạn là một *client* của AuthGate. Đăng ký một lần bằng admin key, bạn nhận
 về `clientId` và `accessKey`. Key chỉ hiện đúng một lần: cất ngay vào chỗ giữ secret.
 Lỡ mất thì rotate bằng `POST /api/clients/{id}/keys`.
 

@@ -5,7 +5,7 @@ tryIt: /app/login
 # 2FA after password
 
 You check the password. If the user has a factor, give them a half session that can
-only do the second step, then ask auth-gate.
+only do the second step, then ask AuthGate.
 
 ```text
 browser            backend                          auth-gate

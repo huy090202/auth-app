@@ -3,7 +3,7 @@ title: Verify the token
 ---
 # Verify the token
 
-Never trust a token because it came back from auth-gate over your own connection.
+Never trust a token because it came back from AuthGate over your own connection.
 Check it. This file (`bff/src/authgate/token.ts`) has no dependency on the rest of
 `bff`; copy it. It needs `jose`.
 

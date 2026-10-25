@@ -32,7 +32,7 @@ await verifyAuthGateToken(typeof b.stepUpToken === 'string' ? b.stepUpToken : ''
 ```
 
 Only start step-ups for purposes you know (`bff` keeps an allow-list), so a made-up
-purpose never reaches auth-gate.
+purpose never reaches AuthGate.
 
 In v1 a replayed token is accepted until `exp`. If that matters to you, track `jti`
 and refuse a token you have already seen.

@@ -3,10 +3,10 @@ title: Lỗi
 ---
 # Lỗi
 
-auth-gate trả về một status và `{error}`. `bff` ánh xạ như dưới đây, và nhiều khả năng
+AuthGate trả về một status và `{error}`. `bff` ánh xạ như dưới đây, và nhiều khả năng
 bạn cũng muốn làm y vậy:
 
-| auth-gate | bff | Hiển thị gì |
+| AuthGate | bff | Hiển thị gì |
 |---|---|---|
 | 400 `verification_failed` + `attemptsRemaining` | 400 như cũ, giữ `attemptsRemaining` | "Sai PIN, còn N lần thử" |
 | 423 `locked` + `lockedUntil` | 423 như cũ | khoá form, hiện giờ mở khoá |

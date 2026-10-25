@@ -3,7 +3,7 @@ title: Verify token
 ---
 # Verify token
 
-Đừng tin token chỉ vì nó về từ auth-gate qua kết nối của chính bạn. Hãy kiểm tra nó.
+Đừng tin token chỉ vì nó về từ AuthGate qua kết nối của chính bạn. Hãy kiểm tra nó.
 File này (`bff/src/authgate/token.ts`) không phụ thuộc phần nào khác của `bff`; cứ chép
 về. Nó cần `jose`.
 

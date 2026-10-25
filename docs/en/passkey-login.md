@@ -5,7 +5,7 @@ tryIt: /app/login/passkey
 # Passkey-only login
 
 No password. The user types a username, you look it up and challenge their passkey.
-auth-gate v1 has no discoverable credentials, so the username is required.
+AuthGate v1 has no discoverable credentials, so the username is required.
 
 ```text
 browser          backend                          auth-gate

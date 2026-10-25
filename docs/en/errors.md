@@ -3,10 +3,10 @@ title: Errors
 ---
 # Errors
 
-auth-gate answers with a status and `{error}`. `bff` maps them like this, and you
+AuthGate answers with a status and `{error}`. `bff` maps them like this, and you
 probably want the same:
 
-| auth-gate | bff | What to show |
+| AuthGate | bff | What to show |
 |---|---|---|
 | 400 `verification_failed` + `attemptsRemaining` | 400 same, keeps `attemptsRemaining` | "Wrong PIN, N attempts left" |
 | 423 `locked` + `lockedUntil` | 423 same | disable the form, show when it unlocks |

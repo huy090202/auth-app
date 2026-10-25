@@ -5,7 +5,7 @@ tryIt: /app/login/passkey
 # Đăng nhập chỉ bằng passkey
 
 Không có mật khẩu. User gõ username, bạn tra user rồi challenge passkey của họ.
-auth-gate v1 chưa hỗ trợ discoverable credential, nên bắt buộc phải có username.
+AuthGate v1 chưa hỗ trợ discoverable credential, nên bắt buộc phải có username.
 
 ```text
 browser          backend                          auth-gate

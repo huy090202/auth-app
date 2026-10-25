@@ -42,7 +42,7 @@ export function describe(e: unknown): string {
     case 'network_error':
       return 'Could not reach the server.';
     case 'authgate_unavailable':
-      return 'auth-gate is unavailable right now. Try again in a moment.';
+      return 'AuthGate is unavailable right now. Try again in a moment.';
     case 'unauthorized':
       return 'Your session ended. Sign in again.';
     default:

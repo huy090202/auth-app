@@ -3,7 +3,7 @@ title: Register your backend
 ---
 # Register your backend
 
-Your backend is a *client* of auth-gate. Register it once with the admin key. You get
+Your backend is a *client* of AuthGate. Register it once with the admin key. You get
 back a `clientId` and an `accessKey`. The key is shown once: store it as a secret
 straight away. If you lose it, rotate it with `POST /api/clients/{id}/keys`.
 
