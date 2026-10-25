@@ -1,11 +1,11 @@
 ---
-title: 2FA sau mật khẩu
+title: 2FA sau bước nhập mật khẩu
 tryIt: /app/login
 ---
-# 2FA sau mật khẩu
+# 2FA sau bước nhập mật khẩu
 
-Bạn tự kiểm tra mật khẩu. Nếu user có yếu tố thứ hai, cấp một session "tạm" chỉ đủ
-để làm bước tiếp theo, rồi hỏi AuthGate.
+Đây là xác thực 2 yếu tố (2FA) kiểu quen thuộc. Mật khẩu thì bạn tự check. Nếu user
+đã bật PIN hoặc passkey, cấp cho họ một session "nửa vời" chỉ đủ quyền xác thực yếu tố thứ hai, rồi gọi AuthGate.
 
 ```text
 browser            backend                          auth-gate
@@ -18,7 +18,8 @@ browser            backend                          auth-gate
   │ ◄── done
 ```
 
-Backend: chuyển tiếp, rồi verify token trước khi tin nó (`bff/src/routes/auth.ts`):
+Phía backend: forward sang AuthGate, rồi verify token xong mới tin
+(`bff/src/routes/auth.ts`):
 
 ```ts
 const v = await authGate.verifyChallenge(c.var.trace, challengeId, parseProof(b));
@@ -26,7 +27,7 @@ await verifyLoginToken(v.token, userId);
 await issueSession(c, secret, { userId, mfa: true });
 ```
 
-Bản thân lời gọi API chuyển tiếp chỉ là một `fetch` kèm client key (`bff/src/authgate/client.ts`):
+Phần forward chỉ là một `fetch` kèm client key (`bff/src/authgate/client.ts`):
 
 ```ts
 res = await this.fetchFn(`${this.baseUrl}${path}`, {
@@ -39,10 +40,11 @@ res = await this.fetchFn(`${this.baseUrl}${path}`, {
 });
 ```
 
-Trình duyệt, với passkey (`app/src/app/SecondFactor.tsx`, codec lấy từ `webauthn.ts`):
+Phía browser, nếu dùng passkey (`app/src/app/SecondFactor.tsx`, codec nằm trong
+`webauthn.ts`):
 
 ```ts
 const cred = (await navigator.credentials.get({ publicKey: toRequestOptions(ch.publicKey) })) as PublicKeyCredential | null;
 ```
 
-rồi gửi `{ credential: serializeCredential(cred) }`. Với PIN thì gửi `{ pin }`.
+rồi gửi `{ credential: serializeCredential(cred) }`. Nếu dùng PIN thì gửi `{ pin }`.

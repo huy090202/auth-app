@@ -5,7 +5,7 @@ import { pages, type TocItem } from './loader';
 
 const groups: { label: Record<Lang, string>; slugs: string[] }[] = [
   { label: { en: 'Get started', vi: 'Bắt đầu' }, slugs: ['what-it-is', 'setup'] },
-  { label: { en: 'Flows', vi: 'Luồng' }, slugs: ['enroll', '2fa-login', 'passkey-login', 'step-up'] },
+  { label: { en: 'Flows', vi: 'Các flow' }, slugs: ['enroll', '2fa-login', 'passkey-login', 'step-up'] },
   { label: { en: 'Reference', vi: 'Tham khảo' }, slugs: ['verify-token', 'errors'] },
 ];
 

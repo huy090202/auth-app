@@ -4,13 +4,13 @@ tryIt: /app/security
 ---
 # Đăng ký PIN hoặc passkey
 
-Người dùng phải có yếu tố trước thì mới challenge được. `subjectId` là id user của bạn;
-chọn thứ gì ổn định, đừng dùng username.
+User phải đăng ký PIN hoặc passkey trước thì bạn mới mở challenge được. `subjectId`
+là id user bên bạn; chọn giá trị nào cố định, đừng dùng username.
 
-**PIN** chỉ một lời gọi API: `POST /api/factors/pin` với `{subjectId, pin}`. Gỡ bằng
-`DELETE /api/factors/pin/{subjectId}`.
+**PIN** chỉ cần một call: `POST /api/factors/pin` với `{subjectId, pin}`. Muốn gỡ thì
+gọi `DELETE /api/factors/pin/{subjectId}`.
 
-**Passkey** cần hai lời gọi API, trình duyệt đứng giữa:
+**Passkey** cần hai call, ở giữa là bước của browser:
 
 ```text
 browser          backend                       auth-gate
@@ -21,8 +21,8 @@ browser          backend                       auth-gate
   │                 ◄── {credentialId}
 ```
 
-Options trả về dạng JSON với chuỗi base64url, còn WebAuthn lại cần `ArrayBuffer`. Toàn
-bộ phần chuyển đổi chỉ có vậy (`app/src/lib/webauthn.ts`):
+Options trả về là JSON, các field nhị phân encode base64url, trong khi WebAuthn lại
+đòi `ArrayBuffer`. Phần convert chỉ có chừng này (`app/src/lib/webauthn.ts`):
 
 ```ts
 export function fromB64url(s: string): ArrayBuffer {
@@ -34,6 +34,6 @@ export function fromB64url(s: string): ArrayBuffer {
 }
 ```
 
-`toCreationOptions` giải mã `challenge`, `user.id` và `excludeCredentials`;
-`serializeCredential` mã hoá kết quả ngược lại. Xem danh sách yếu tố bằng
-`GET /api/factors/{subjectId}`.
+`toCreationOptions` decode `challenge`, `user.id` và `excludeCredentials`;
+`serializeCredential` encode kết quả ngược lại để gửi lên. Muốn xem user đã gắn
+PIN/passkey nào thì gọi `GET /api/factors/{subjectId}`.

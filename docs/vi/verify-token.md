@@ -3,9 +3,9 @@ title: Verify token
 ---
 # Verify token
 
-Đừng tin token chỉ vì nó về từ AuthGate qua kết nối của chính bạn. Hãy kiểm tra nó.
-File này (`bff/src/authgate/token.ts`) không phụ thuộc phần nào khác của `bff`; cứ chép
-về. Nó cần `jose`.
+Token trả về từ AuthGate qua kết nối của chính bạn thì cũng đừng tin ngay, luôn verify.
+File này (`bff/src/authgate/token.ts`) không phụ thuộc phần nào khác trong `bff`, cứ
+copy về mà dùng. Chỉ cần thêm `jose`.
 
 ```ts
 export function remoteJwks(baseUrl: string): JWTVerifyGetKey {
@@ -36,15 +36,15 @@ export async function verifyAuthGateToken(
 }
 ```
 
-Mọi lỗi đều ném `TokenRejectedError`, không kèm chi tiết. Bạn tự đổi nó sang lỗi của
-mình: `bff` trả `401` khi đăng nhập và `403 step_up_required` khi step-up.
+Fail ở bước nào cũng throw `TokenRejectedError`, không kèm chi tiết. Bạn tự map sang
+lỗi của mình: `bff` trả `401` khi login và `403 step_up_required` khi step-up.
 
-| Claim | Kiểm tra |
+| Claim | Check gì |
 |---|---|
 | chữ ký | ES256, key lấy từ `<AUTHGATE_BASE_URL>/.well-known/jwks.json` (cache 5 phút) |
-| `iss` | bằng `AUTHGATE_BASE_URL` của bạn |
-| `aud` | bằng `clientId` của bạn |
-| `exp` | chưa tới (`jose` lo việc này) |
-| `sub` | đúng user bạn mong đợi |
-| `purpose` | đúng thao tác bạn mong đợi (`login`, `change-email`, ...) |
-| `jti` | id duy nhất; lưu lại nếu cần dùng một lần |
+| `iss` | khớp `AUTHGATE_BASE_URL` của bạn |
+| `aud` | khớp `clientId` của bạn |
+| `exp` | chưa hết hạn (`jose` tự check) |
+| `sub` | đúng user bạn đang xử lý |
+| `purpose` | đúng thao tác bạn đang xử lý (`login`, `change-email`, ...) |
+| `jti` | id duy nhất; lưu lại nếu cần token chỉ dùng được một lần |

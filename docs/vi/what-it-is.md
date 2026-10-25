@@ -3,13 +3,13 @@ title: AuthGate là gì
 ---
 # AuthGate là gì
 
-AuthGate kiểm tra yếu tố thứ hai của người dùng: PIN hoặc passkey. Bạn nhờ nó tạo một
-challenge, chuyển câu trả lời của người dùng sang, rồi nhận về một token ký số, sống
-ngắn, nói rằng "subject này đã qua yếu tố này cho mục đích này". Bạn tự verify token và
-tự quyết nó mở khoá được gì.
+AuthGate lo bước xác thực yếu tố thứ hai (PIN hoặc passkey) cho user của bạn, tức phần
+thứ hai của xác thực 2 yếu tố (2FA). Backend của bạn mở một challenge, chuyển câu trả lời của user sang AuthGate, và nhận về một token
+có hạn ngắn, ký sẵn, xác nhận rằng "user này vừa qua PIN/passkey cho đúng việc này".
+Bạn verify token đó rồi tự quyết cho user làm gì tiếp.
 
-Nó không biết gì về user, mật khẩu hay session của bạn. Mấy thứ đó backend của bạn giữ,
-và chỉ backend mới nói chuyện với AuthGate. Trình duyệt thì không bao giờ.
+AuthGate không biết gì về user, mật khẩu hay session của bạn. Mấy thứ đó backend giữ
+hết, và chỉ backend mới gọi AuthGate. Browser không bao giờ gọi thẳng.
 
 ```text
 browser ──► your backend ──► auth-gate
@@ -19,7 +19,7 @@ browser ──► your backend ──► auth-gate
    ◄── your session / your action
 ```
 
-Trang này gồm hai phần: tài liệu bạn đang đọc, và một app demo có backend (`bff`) là
-một client chạy thật để bạn chép. Mỗi nút "Thử ngay" mở demo kèm bảng trace, cho thấy
-đúng các request `bff` đã gửi tới AuthGate. Trace chỉ để demo, đừng đưa nó vào client
-thật.
+Site này gồm hai phần: bộ docs bạn đang đọc, và một app demo có backend (`bff`) là
+client chạy thật, cần gì cứ copy. Mỗi nút "Chạy thử" mở demo kèm panel trace, hiện đúng
+các request `bff` đã gửi sang AuthGate. Trace chỉ có trong demo, đừng mang nó lên
+client thật.

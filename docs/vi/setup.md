@@ -1,23 +1,23 @@
 ---
-title: Đăng ký backend
+title: Đăng ký backend với AuthGate
 ---
-# Đăng ký backend
+# Đăng ký backend với AuthGate
 
-Backend của bạn là một *client* của AuthGate. Đăng ký một lần bằng admin key, bạn nhận
-về `clientId` và `accessKey`. Key chỉ hiện đúng một lần: cất ngay vào chỗ giữ secret.
-Lỡ mất thì rotate bằng `POST /api/clients/{id}/keys`.
+Với AuthGate, backend của bạn là một *client*. Bạn đăng ký nó một lần bằng admin key
+và nhận về `clientId` cùng `accessKey`. Key chỉ hiện đúng một lần, nên lưu ngay vào
+chỗ cất secret. Lỡ làm mất thì rotate bằng `POST /api/clients/{id}/keys`.
 
-`rpId` và `origins` dành cho passkey: domain mà trình duyệt thấy, và chính xác các
-origin phục vụ trang của bạn. Sai một cái là mọi lời gọi API WebAuthn đều hỏng.
+`rpId` và `origins` là để chạy passkey: `rpId` là domain browser thấy, `origins` là
+chính xác các origin serve trang của bạn. Khai sai là mọi call WebAuthn đều fail.
 
-Trong repo này chỉ cần một script:
+Trong repo này chỉ cần chạy một script:
 
 ```bash
 AUTHGATE_BASE_URL=https://auth-gate.example.com AUTHGATE_ADMIN_KEY=... \
   scripts/setup-and-deploy/02-register-client.sh local   # or: stg
 ```
 
-Lệnh `curl` bên dưới (secret đi qua file, không bao giờ qua argv):
+Bên dưới là lệnh `curl` này (secret đi qua file, không bao giờ nằm trên argv):
 
 ```bash
 printf 'x-internal-access-key: %s\n' "$AUTHGATE_ADMIN_KEY" >"$tmpdir/headers"
@@ -28,6 +28,6 @@ status="$(curl -sS -o "$tmpdir/resp" -w '%{http_code}' -X POST "$base/api/client
   --data-binary @"$tmpdir/body")" || die "POST $base/api/clients: network error"
 ```
 
-Kết quả đúng là `201` với `{clientId, accessKey}`. Từ đó, mọi request backend gửi đi
-đều kèm `x-internal-access-key: <accessKey>`, và token bạn nhận được có
-`aud = clientId`.
+Thành công thì nhận `201` kèm `{clientId, accessKey}`. Từ đó mọi request backend gửi
+sang AuthGate đều mang header `x-internal-access-key: <accessKey>`, và token trả về
+có `aud = clientId`.

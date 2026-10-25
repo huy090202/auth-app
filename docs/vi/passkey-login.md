@@ -4,8 +4,8 @@ tryIt: /app/login/passkey
 ---
 # Đăng nhập chỉ bằng passkey
 
-Không có mật khẩu. User gõ username, bạn tra user rồi challenge passkey của họ.
-AuthGate v1 chưa hỗ trợ discoverable credential, nên bắt buộc phải có username.
+Không cần mật khẩu. User nhập username, bạn tìm user rồi mở challenge cho passkey của
+họ. AuthGate v1 chưa hỗ trợ discoverable credential nên vẫn phải có username.
 
 ```text
 browser          backend                          auth-gate
@@ -18,8 +18,8 @@ browser          backend                          auth-gate
   │ ◄── done
 ```
 
-Đừng để lộ username nào tồn tại. Trong `bff`, username không có và user chưa có passkey
-nhận cùng một câu trả lời, `409 factor_not_enrolled`:
+Đừng để người ngoài dò được username nào có thật. Trong `bff`, username không tồn tại
+và user chưa có passkey đều nhận cùng một response, `409 factor_not_enrolled`:
 
 ```ts
 const notEnrolled = () => c.json({ error: 'factor_not_enrolled' }, 409);
@@ -29,10 +29,11 @@ if (f.webauthn.length === 0) return notEnrolled();
 const ch = await authGate.createChallenge(c.var.trace, user.userId, 'login', 'webauthn');
 ```
 
-Lúc verify chưa có session, nên lấy `sub` từ token, nhưng vẫn verify đủ (chữ ký, `iss`,
-`aud`, `exp`, `purpose: "login"`), rồi kiểm tra user có tồn tại phía bạn không.
+Lúc verify thì chưa có session, nên bạn lấy `sub` từ token. Dù vậy vẫn phải verify đủ
+(chữ ký, `iss`, `aud`, `exp`, `purpose: "login"`), rồi check xem user đó có thật trong
+hệ thống của bạn không.
 
-Trình duyệt (`app/src/lib/webauthn.ts`):
+Phía browser (`app/src/lib/webauthn.ts`):
 
 ```ts
 export function toRequestOptions(publicKey: unknown): PublicKeyCredentialRequestOptions {
