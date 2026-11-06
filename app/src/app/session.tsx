@@ -48,7 +48,7 @@ export function describe(e: unknown, t: Strings): string {
     case 'unauthorized':
       return t.errUnauthorized;
     default:
-      return t.errUnknown(e.code, e.status);
+      return (t.errors as Record<string, string | undefined>)[e.code] ?? t.errUnknown(e.code, e.status);
   }
 }
 
