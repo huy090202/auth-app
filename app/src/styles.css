@@ -141,6 +141,10 @@ nav > div:first-child > .nav-group { padding-top: 0; }
   .docs-main { padding: 24px 16px 96px; }
   .topnav a { padding: 6px 8px; }
   .site-header { gap: 12px; padding: 0 12px; }
+  /* Long endpoints and field names must not push the page sideways. Tables scroll
+     instead of wrapping, so error codes and field names stay readable. */
+  .doc :is(p, li) code, .doc h3 { overflow-wrap: anywhere; }
+  .doc table { display: block; overflow-x: auto; }
 }
 @media (max-width: 520px) { .brand .word { display: none; } }
 

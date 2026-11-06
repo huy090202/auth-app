@@ -3,48 +3,62 @@ title: Verify token
 ---
 # Verify token
 
-Token trả về từ AuthGate qua kết nối của chính bạn thì cũng đừng tin ngay, luôn verify.
-File này (`bff/src/authgate/token.ts`) không phụ thuộc phần nào khác trong `bff`, cứ
-copy về mà dùng. Chỉ cần thêm `jose`.
+Token trả về từ AuthGate qua kết nối của chính bạn thì cũng đừng tin ngay. Lần nào cũng phải verify,
+kể cả khi browser gửi lại token cho bạn lúc step-up.
+
+Đoạn code này dùng [`jose`](https://github.com/panva/jose) và không cần gì thêm. Nếu dùng ngôn ngữ
+khác, chọn một thư viện JOSE rồi kiểm tra đúng những mục này.
 
 ```ts
-export function remoteJwks(baseUrl: string): JWTVerifyGetKey {
-  return createRemoteJWKSet(new URL('/.well-known/jwks.json', baseUrl), {
-    cooldownDuration: 300_000,
-    cacheMaxAge: 300_000,
-  });
-}
+import { createRemoteJWKSet, jwtVerify } from 'jose';
 
-/** Verify an auth-gate token (login or step-up). Any failure throws TokenRejectedError. */
+const AUTHGATE_URL = process.env.AUTHGATE_URL!; // https://<authgate-host>, no trailing slash
+const CLIENT_ID = process.env.AUTHGATE_CLIENT_ID!;
+
+const jwks = createRemoteJWKSet(new URL('/.well-known/jwks.json', AUTHGATE_URL), {
+  cacheMaxAge: 300_000,
+});
+
+/** Throws if the token is not valid for this purpose and, when given, this subject. */
 export async function verifyAuthGateToken(
   token: string,
-  opts: { jwks: JWTVerifyGetKey; issuer: string; audience: string; subject: string; purpose: string },
-): Promise<AuthGateClaims> {
-  try {
-    const { payload } = await jwtVerify(token, opts.jwks, {
-      algorithms: ['ES256'],
-      issuer: opts.issuer,
-      audience: opts.audience,
-    });
-    if (payload.sub !== opts.subject || payload.purpose !== opts.purpose) {
-      throw new Error('claim mismatch');
-    }
-    return payload as unknown as AuthGateClaims;
-  } catch {
-    throw new TokenRejectedError();
-  }
+  expected: { purpose: string; subject?: string },
+) {
+  const { payload } = await jwtVerify(token, jwks, {
+    algorithms: ['ES256'],
+    issuer: AUTHGATE_URL,
+    audience: CLIENT_ID,
+    subject: expected.subject,
+    requiredClaims: ['exp', 'sub'],
+  });
+  if (payload.purpose !== expected.purpose) throw new Error('wrong purpose');
+  return payload;
 }
 ```
 
-Fail ở bước nào cũng throw `TokenRejectedError`, không kèm chi tiết. Bạn tự map sang
-lỗi của mình: `bff` trả `401` khi login và `403 step_up_required` khi step-up.
+Có gì sai là hàm throw. Đổi nó thành lỗi của riêng bạn, và đừng cho người gọi biết bước nào fail.
 
-| Claim | Check gì |
+## Cần kiểm tra những gì
+
+| Mục | Kiểm tra |
 |---|---|
-| chữ ký | ES256, key lấy từ `<AUTHGATE_BASE_URL>/.well-known/jwks.json` (cache 5 phút) |
-| `iss` | khớp `AUTHGATE_BASE_URL` của bạn |
-| `aud` | khớp `clientId` của bạn |
-| `exp` | chưa hết hạn (`jose` tự check) |
-| `sub` | đúng user bạn đang xử lý |
-| `purpose` | đúng thao tác bạn đang xử lý (`login`, `change-email`, ...) |
-| `jti` | id duy nhất; lưu lại nếu cần token chỉ dùng được một lần |
+| chữ ký | ES256, dùng key trong `<base URL>/.well-known/jwks.json` có `kid` khớp với header của token |
+| `iss` | bằng base URL của bạn, ví dụ `https://<authgate-host>` |
+| `aud` | bằng `clientId` của bạn |
+| `exp` | chưa tới |
+| `sub` | đúng user bạn đang chờ, nếu biết trước. Với đăng nhập chỉ bằng passkey, đây là cách bạn biết user là ai. |
+| `purpose` | đúng thao tác bạn sắp cho phép |
+
+Có thêm ba claim nữa nếu bạn cần:
+
+| Claim | Ý nghĩa |
+|---|---|
+| `amr` | `["pin"]` hoặc `["webauthn"]`: yếu tố đã dùng. Phải kiểm tra nếu thao tác chỉ chấp nhận một số yếu tố nhất định. |
+| `iat` | thời điểm cấp token |
+| `jti` | id của challenge, mỗi token một giá trị. Lưu lại nếu bạn cần [dùng một lần](/docs/step-up#chi-dung-mot-lan). |
+
+## Key có thể đổi
+
+Mỗi lần verify, chọn key theo `kid`, đừng hard-code key trong code. Bộ key có thể có nhiều hơn một key
+trong lúc rotate signing key. Bộ này được cache tối đa 300 giây, và key set của `jose` ở trên đã tự lo
+chuyện cache lẫn `kid` lạ.

@@ -16,7 +16,7 @@ describe('parseFrontmatter', () => {
 });
 
 describe('pages', () => {
-  it('has the eight slugs in order in both languages, all titled', () => {
+  it('has the ten slugs in order in both languages, all titled', () => {
     for (const lang of ['en', 'vi'] as const) {
       expect(pages[lang].map((p) => p.slug)).toEqual([...slugs]);
       for (const p of pages[lang]) expect(p.title).not.toBe('');

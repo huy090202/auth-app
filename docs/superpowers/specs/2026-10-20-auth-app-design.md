@@ -191,18 +191,24 @@ Source: `docs/en/<page>.md` and `docs/vi/<page>.md`, same file names, frontmatte
 `title` and optional `tryIt: /app/...`. Loaded with Vite `import.meta.glob(..., {query:
 '?raw'})`, rendered with `marked`; the two frontmatter keys are parsed by a ten-line
 function, no frontmatter library. Language toggle EN/VI in the header, stored in
-`localStorage`, URL unchanged. Each page fits one screen.
+`localStorage`, URL unchanged. Pages stay short; `api` is the one long page.
+
+The pages are written for an outside team integrating AuthGate: no repo paths, repo scripts or
+demo internals, and the demo appears only as an optional Try it. Every API fact is checked
+against auth-gate.
 
 | Page | Content |
 |---|---|
-| `what-it-is` | ten lines: what auth-gate does and does not do, one diagram |
-| `setup` | register a client with the admin key, keep the client key, `rpId`/`origins` |
-| `enroll` | PIN and passkey enrollment, Try it → `/app/security` |
-| `2fa-login` | sequence diagram, backend relay snippet, browser snippet, Try it |
+| `what-it-is` | what AuthGate provides and what stays with the integrator, one diagram |
+| `checklist` | the integration steps in order, each linking to its page, and a pre-launch list |
+| `setup` | request a client from the operator, `rpId`/`origins`, the call helper, key rotation |
+| `enroll` | PIN and passkey enrollment, WebAuthn conversion, list and remove, Try it → `/app/security` |
+| `2fa-login` | sequence diagram, backend snippets, browser snippet, Try it |
 | `passkey-login` | same shape |
 | `step-up` | same shape, plus why the token goes with the action |
-| `verify-token` | the `token.ts` snippet and the table of claims to check |
-| `errors` | status/`error` → what to do |
+| `verify-token` | a standalone `jose` sample and the table of claims to check |
+| `api` | every call an integrator's backend makes: request, success, errors |
+| `errors` | status/`error` → what happened and what to do |
 
 ## 6. Infra and deploy
 

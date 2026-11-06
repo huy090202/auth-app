@@ -1,6 +1,6 @@
 import { Button } from '@mantine/core';
-import type { MouseEvent } from 'react';
-import { Link, Navigate, useParams } from 'react-router';
+import { useEffect, type MouseEvent } from 'react';
+import { Link, Navigate, useLocation, useParams } from 'react-router';
 import { docsTitle, useTitle } from '../brand';
 import { useLang } from '../lib/i18n';
 import { DocsLayout } from './DocsLayout';
@@ -26,6 +26,11 @@ export function DocsPage() {
   const { page } = useParams();
   const doc = pages[lang].find((p) => p.slug === page);
   useTitle(docsTitle(doc?.title ?? 'Docs'));
+  const { hash } = useLocation();
+  // The browser looks for the #section before React renders it, so a link from another page needs this.
+  useEffect(() => {
+    if (hash) document.getElementById(hash.slice(1))?.scrollIntoView();
+  }, [hash, doc]);
   if (!doc) return <Navigate to="/docs/what-it-is" replace />;
   const key = `${lang}/${doc.slug}`;
   return (
