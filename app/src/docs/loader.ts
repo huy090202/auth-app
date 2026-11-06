@@ -6,7 +6,7 @@ export type TocItem = { id: string; text: string; depth: 2 | 3 };
 export type DocPage = { slug: string; lang: Lang; title: string; tryIt?: string; html: string; toc: TocItem[] };
 
 export const slugs = [
-  'what-it-is', 'setup', 'enroll', '2fa-login', 'passkey-login', 'step-up', 'verify-token', 'errors',
+  'what-it-is', 'checklist', 'setup', 'enroll', '2fa-login', 'passkey-login', 'step-up', 'verify-token', 'api', 'errors',
 ] as const;
 
 /** `---\ntitle: …\ntryIt: …\n---` then the body. Only those two keys. */

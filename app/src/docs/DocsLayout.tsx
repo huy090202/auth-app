@@ -4,9 +4,9 @@ import { useLang, type Lang } from '../lib/i18n';
 import { pages, type TocItem } from './loader';
 
 const groups: { label: Record<Lang, string>; slugs: string[] }[] = [
-  { label: { en: 'Get started', vi: 'Bắt đầu' }, slugs: ['what-it-is', 'setup'] },
+  { label: { en: 'Get started', vi: 'Bắt đầu' }, slugs: ['what-it-is', 'checklist', 'setup'] },
   { label: { en: 'Flows', vi: 'Các flow' }, slugs: ['enroll', '2fa-login', 'passkey-login', 'step-up'] },
-  { label: { en: 'Reference', vi: 'Tham khảo' }, slugs: ['verify-token', 'errors'] },
+  { label: { en: 'Reference', vi: 'Tham khảo' }, slugs: ['verify-token', 'api', 'errors'] },
 ];
 
 /** Grouped page list; used in the sidebar and in the mobile drawer. */

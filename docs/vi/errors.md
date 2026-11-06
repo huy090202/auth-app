@@ -3,25 +3,46 @@ title: Xử lý lỗi
 ---
 # Xử lý lỗi
 
-AuthGate trả lỗi dạng status code kèm `{error}`. `bff` map lại như bảng dưới, nhiều
-khả năng bạn cũng sẽ làm y vậy:
+AuthGate trả lỗi dạng status kèm `{"error": "<code>"}`. User thấy gì là do backend của bạn quyết định,
+nên đừng chuyển nguyên các response này ra ngoài.
 
-| AuthGate | bff | Hiện gì cho user |
+## Lỗi do user gây ra
+
+| Status và mã | Chuyện gì xảy ra | Nên làm gì |
 |---|---|---|
-| 400 `verification_failed` + `attemptsRemaining` | 400 giữ nguyên, kèm `attemptsRemaining` | "Sai PIN, còn N lần thử" |
-| 423 `locked` + `lockedUntil` | 423 giữ nguyên | khoá form, báo khi nào mở lại |
-| 410 `challenge_gone` | 410 giữ nguyên | "Hết hạn, thử lại nhé", tự mở challenge mới |
-| 404 `factor_not_found` | 409 `factor_not_enrolled` | dẫn sang `/app/security` để đăng ký |
-| 400 `registration_failed` | 400 giữ nguyên | "Không đăng ký được passkey này" |
-| 5xx hoặc lỗi mạng | 502 `authgate_unavailable` | thông báo chung chung; đừng lộ lỗi từ upstream |
+| `400 verification_failed` + `attemptsRemaining` | Sai PIN, hoặc câu trả lời passkey không hợp lệ. | Hỏi lại trên chính challenge đó và báo số lượt còn lại. Về `0` thì mở challenge mới. |
+| `423 locked` + `lockedUntil` | Subject này sai PIN quá nhiều lần. | Khoá form và báo khi nào mở lại. |
+| `410 challenge_gone` | Challenge hoặc registration đã hết hạn, đã dùng, hết lượt thử, hoặc không phải của bạn. | Đừng retry call đó. Bắt đầu lại từ đầu. |
+| `400 pin_rejected` | PIN mới vi phạm policy: sai độ dài, có ký tự không phải số, lặp một số, hoặc dãy liền nhau. | Yêu cầu chọn PIN khác. |
+| `404 factor_not_found` | Subject chưa có loại yếu tố này. | Đề nghị yếu tố khác. Chỉ mời đăng ký khi đã có session đầy đủ, và phải qua step-up nếu user đã có yếu tố. Nếu không, người chỉ biết mật khẩu có thể tự đăng ký PIN rồi vượt qua 2FA. Với đăng nhập chỉ bằng passkey, trả đúng câu bạn dùng cho username không tồn tại. |
+| `400 registration_failed` | Response của passkey không hợp lệ, thường do `rpId` hoặc `origins` không khớp với trang. | Làm lại registration từ đầu. |
 
-Vài điểm cần để ý:
+## Lỗi do bug hoặc cấu hình
 
-- Challenge chỉ dùng được một lần và hết hạn nhanh. Gặp `410` thì mở challenge mới,
-  đừng retry verify.
-- `404 factor_not_found` được đổi thành `409` vì nhìn từ phía user thì server không
-  thiếu gì cả, chỉ là họ chưa đăng ký PIN/passkey.
-- Với login chỉ bằng passkey, username không tồn tại cũng nhận `409
-  factor_not_enrolled`, để không ai dò được username.
-- Token verify fail thì xử lý thế nào là quyền của bạn: `bff` trả `401 unauthorized`
-  khi login và `403 step_up_required` với thao tác cần step-up.
+| Status và mã | Chuyện gì xảy ra | Nên làm gì |
+|---|---|---|
+| `401 unauthorized` | Key thiếu, sai, đã quá 24 giờ sau khi rotate, hoặc AuthGate không tra được key. Body không bao giờ nói rõ lý do. | Kiểm tra key đang cấu hình. Nếu key đúng thì thử lại trước khi xin key mới. |
+| `400 invalid_json` | Body không phải JSON hợp lệ, có field sai kiểu hoặc lớn quá 1 MiB, thiếu `credential` ở call finish, hoặc call verify không gửi đúng một trong hai `pin` và `credential`. | Sửa request. |
+| `400 invalid_id` | `subjectId` hoặc `purpose` bị thiếu hay rỗng, hoặc một id dài quá 256 byte hay chứa `#`. | Sửa request. |
+| `400 wrong_factor` | `factor` không phải `pin` hay `webauthn`, hoặc body của call verify không khớp với loại challenge. Trường hợp không khớp sẽ mất một lượt thử. | Sửa request. |
+
+## Lỗi phía AuthGate
+
+| Status | Chuyện gì xảy ra | Nên làm gì |
+|---|---|---|
+| `500 internal`, 5xx khác hoặc lỗi mạng | AuthGate không hoàn tất được call. | Hiện thông báo chung chung, đừng lộ chi tiết từ upstream. Nếu xảy ra ở call verify thì mở challenge mới. |
+
+## Vài điểm cần để ý
+
+- **Số lần sai tính theo subject.** Mở challenge mới không reset số lần sai PIN, còn `attemptsRemaining`
+  chỉ tính trong challenge hiện tại. Sau khi mở challenge mới, user có thể bị khoá sớm hơn con số đó,
+  nên đừng coi nó là cam kết.
+- **Có hai cách hết khoá:** qua thời điểm `lockedUntil`, hoặc đăng ký PIN mới. Đăng ký PIN sẽ xoá khoá,
+  nên nhớ [bảo vệ route đó](/docs/enroll).
+- **Nhập đúng PIN sẽ reset số lần sai.**
+- **Passkey không bị khoá.** Lần sai thứ ba trên challenge passkey trả `400` kèm `attemptsRemaining: 0`,
+  và mọi call sau đó trả `410`.
+- **`subjectId` dài quá 64 byte sẽ làm hỏng đăng ký passkey.** Call đó trả `500 internal`, không phải
+  `400`. Xem [Đăng ký PIN hoặc passkey](/docs/enroll).
+- **Token verify fail là việc của bạn.** Lúc đó AuthGate không còn liên quan. Dùng `401` hoặc `403` của
+  riêng bạn.

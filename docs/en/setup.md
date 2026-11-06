@@ -1,33 +1,70 @@
 ---
-title: Register your backend
+title: Get your credentials
 ---
-# Register your backend
+# Get your credentials
 
-Your backend is a *client* of AuthGate. Register it once with the admin key. You get
-back a `clientId` and an `accessKey`. The key is shown once: store it as a secret
-straight away. If you lose it, rotate it with `POST /api/clients/{id}/keys`.
+Your backend is a *client* of AuthGate. Each client has its own key, users and settings.
 
-`rpId` and `origins` are for passkeys: the domain the browser sees, and the exact
-origins your pages are served from. Get them wrong and every WebAuthn call fails.
+## Request a client
 
-In this repo it is one script:
+The team that operates your AuthGate creates clients. Send them these values:
 
-```bash
-AUTHGATE_BASE_URL=https://auth-gate.example.com AUTHGATE_ADMIN_KEY=... \
-  scripts/setup-and-deploy/02-register-client.sh local   # or: stg
+| Field | Required | Rules |
+|---|---|---|
+| `name` | yes | Your app's name. Browsers may show it in the passkey prompt. |
+| `rpId` | yes | The domain passkeys belong to, such as `example.com`. Use `localhost` for local development. |
+| `origins` | yes | Every origin your pages are served from, such as `https://app.example.com`: scheme, host and optional port, no path. Each host must be the `rpId` or a subdomain of it. |
+| `pinPolicy.length` | no | 4 to 8 digits. Default 6. |
+| `pinPolicy.maxAttempts` | no | 1 to 10 failures before a lockout. Default 5. |
+| `pinPolicy.lockoutSec` | no | 1 to 86400 seconds. Default 900. |
+| `tokenTtlSec` | no | Token lifetime, 1 to 900 seconds. Default 300. |
+
+Choose `rpId` with care. Passkeys are bound to it, so moving to another domain means every
+user enrolls again. If `rpId` or `origins` don't match the page, passkey calls fail.
+
+List every origin you will need up front, and talk to the operator before you need a change.
+A user's factors belong to one client, so moving to a replacement client means every user enrolls
+again.
+
+Use one client per environment. Local, staging and production have different origins, and
+this keeps their users and keys apart.
+
+## What you get back
+
+- **Base URL:** the address your backend calls, written as `https://<authgate-host>` in these
+  docs.
+- **`clientId`:** tokens issued for you carry it as `aud`.
+- **`accessKey`:** a secret starting with `ag_`. It is shown only once, so put it in your
+  secret store straight away.
+
+## Call AuthGate
+
+Every call except the public key set sends the key in `x-internal-access-key`. One helper is
+enough, and the flow pages use this one:
+
+```ts
+const AUTHGATE_URL = process.env.AUTHGATE_URL!;
+const ACCESS_KEY = process.env.AUTHGATE_ACCESS_KEY!;
+
+export async function authGate(method: string, path: string, body?: unknown) {
+  const res = await fetch(AUTHGATE_URL + path, {
+    method,
+    headers: { 'x-internal-access-key': ACCESS_KEY, 'content-type': 'application/json' },
+    body: body === undefined ? undefined : JSON.stringify(body),
+  });
+  const data: any = await res.json().catch(() => ({}));
+  return { status: res.status, data };
+}
 ```
 
-The `curl` behind it (secrets go through files, never argv):
+A missing or wrong key gets `401 {"error":"unauthorized"}`, with no detail about why. A brief
+`401` with a key you know is right can come from a failure on AuthGate's side, so retry before
+asking for a new key.
 
-```bash
-printf 'x-internal-access-key: %s\n' "$AUTHGATE_ADMIN_KEY" >"$tmpdir/headers"
-jq -n --arg name "$name" --arg rp "$rp_id" --arg origin "$origin" \
-  '{name: $name, rpId: $rp, origins: [$origin]}' >"$tmpdir/body"
-status="$(curl -sS -o "$tmpdir/resp" -w '%{http_code}' -X POST "$base/api/clients" \
-  -H @"$tmpdir/headers" -H 'content-type: application/json' \
-  --data-binary @"$tmpdir/body")" || die "POST $base/api/clients: network error"
-```
+## Rotate the key
 
-Expect `201` with `{clientId, accessKey}`. From then on every call your backend makes
-sends `x-internal-access-key: <accessKey>`, and the tokens you get carry
-`aud = clientId`.
+The operator issues new keys. The new key works at once, and the previous one keeps working
+for 24 hours so you can redeploy without downtime.
+
+That also means rotating doesn't stop a leaked key straight away. If your key leaks, tell the
+operator immediately.
