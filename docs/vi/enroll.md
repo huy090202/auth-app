@@ -6,7 +6,7 @@ tryIt: /app/security
 
 User phải có yếu tố thì bạn mới mở challenge được. `subjectId` là user id bên bạn và phải cố định,
 nên đừng dùng username. Chỉ nên dùng chữ cái, chữ số, `-` và `_`, tối đa 64 byte. AuthGate nhận tới
-256 byte, không chứa `#`, nhưng đăng ký passkey sẽ trả `500 internal` nếu dài quá 64. Id này còn được
+256 byte, không chứa `#`, nhưng đăng ký passkey sẽ trả `400 invalid_id` nếu dài quá 64. Id này còn được
 gửi tới browser và có thể hiện trong prompt passkey, nên đừng để thông tin riêng tư trong đó.
 
 Chỉ cho đăng ký khi user đã đăng nhập, và lấy `subjectId` từ session, không bao giờ lấy từ request.
