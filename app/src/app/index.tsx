@@ -10,6 +10,7 @@ import { Register } from './Register';
 import { SecondFactor } from './SecondFactor';
 import { Security } from './Security';
 import { SessionGuard } from './session';
+import { useStrings } from './strings';
 
 /** Signed-out screens: one glass card centred in the viewport. */
 function AuthScreen({ title, children }: { title: string; children: ReactNode }) {
@@ -24,6 +25,7 @@ function AuthScreen({ title, children }: { title: string; children: ReactNode })
 function SignedIn({ title, children }: { title: string; children: ReactNode }) {
   useTitle(demoTitle(title));
   const nav = useNavigate();
+  const t = useStrings();
   const logout = async () => {
     await api('/api/auth/logout', { method: 'POST' }).catch(() => undefined);
     nav('/app/login');
@@ -31,10 +33,10 @@ function SignedIn({ title, children }: { title: string; children: ReactNode }) {
   return (
     <div className="app-stage">
       <div className="app-column">
-        <nav className="app-nav" aria-label="Account">
-          <NavLink to="/app/home" className="nav-link">Home</NavLink>
-          <NavLink to="/app/security" className="nav-link">Security</NavLink>
-          <Button size="compact-sm" variant="subtle" color="gray" ml="auto" onClick={() => void logout()}>Sign out</Button>
+        <nav className="app-nav" aria-label={t.navLabel}>
+          <NavLink to="/app/home" className="nav-link">{t.navHome}</NavLink>
+          <NavLink to="/app/security" className="nav-link">{t.navSecurity}</NavLink>
+          <Button size="compact-sm" variant="subtle" color="gray" ml="auto" onClick={() => void logout()}>{t.signOut}</Button>
         </nav>
         {children}
       </div>
@@ -44,15 +46,16 @@ function SignedIn({ title, children }: { title: string; children: ReactNode }) {
 
 /** Routes under /app/*. */
 export function DemoRoutes() {
+  const t = useStrings();
   return (
     <Routes>
       <Route index element={<Navigate to="login" replace />} />
-      <Route path="register" element={<AuthScreen title="Create an account"><Register /></AuthScreen>} />
-      <Route path="login" element={<AuthScreen title="Sign in"><Login /></AuthScreen>} />
-      <Route path="login/second-factor" element={<AuthScreen title="Second step"><SecondFactor /></AuthScreen>} />
-      <Route path="login/passkey" element={<AuthScreen title="Passkey sign-in"><PasskeyLogin /></AuthScreen>} />
-      <Route path="home" element={<SessionGuard>{(s) => <SignedIn title="Home"><Home {...s} /></SignedIn>}</SessionGuard>} />
-      <Route path="security" element={<SessionGuard>{(s) => <SignedIn title="Security"><Security {...s} /></SignedIn>}</SessionGuard>} />
+      <Route path="register" element={<AuthScreen title={t.titleRegister}><Register /></AuthScreen>} />
+      <Route path="login" element={<AuthScreen title={t.titleLogin}><Login /></AuthScreen>} />
+      <Route path="login/second-factor" element={<AuthScreen title={t.titleSecondStep}><SecondFactor /></AuthScreen>} />
+      <Route path="login/passkey" element={<AuthScreen title={t.titlePasskeyLogin}><PasskeyLogin /></AuthScreen>} />
+      <Route path="home" element={<SessionGuard>{(s) => <SignedIn title={t.navHome}><Home {...s} /></SignedIn>}</SessionGuard>} />
+      <Route path="security" element={<SessionGuard>{(s) => <SignedIn title={t.navSecurity}><Security {...s} /></SignedIn>}</SessionGuard>} />
       <Route path="*" element={<Navigate to="login" replace />} />
     </Routes>
   );

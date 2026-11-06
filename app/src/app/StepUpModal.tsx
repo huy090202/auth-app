@@ -3,6 +3,7 @@ import { Link } from 'react-router';
 import { api } from '../lib/api';
 import { FactorForm } from './SecondFactor';
 import type { Me } from './session';
+import { useStrings } from './strings';
 
 type StepUp = { stepUpToken: string; expiresAt: string };
 
@@ -14,12 +15,13 @@ export function StepUpModal({ opened, purpose, factors, onClose, onToken }: {
   onClose: () => void;
   onToken: (token: string) => void;
 }) {
+  const t = useStrings();
   const available = { pin: factors.pin, webauthn: factors.webauthn.length > 0 };
   return (
-    <Modal opened={opened} onClose={onClose} title="Confirm it is you" centered>
+    <Modal opened={opened} onClose={onClose} title={t.stepUpTitle} centered>
       <Stack>
         <Text fz="sm" c="dimmed">
-          This action needs a fresh verification. The token it returns is good for <code>{purpose}</code> only.
+          {t.stepUpIntro} <code>{purpose}</code> {t.stepUpIntroEnd}
         </Text>
         {available.pin || available.webauthn ? (
           <FactorForm
@@ -30,7 +32,7 @@ export function StepUpModal({ opened, purpose, factors, onClose, onToken }: {
           />
         ) : (
           <Text fz="sm">
-            You have no second factor yet. <Anchor component={Link} to="/app/security">Add a PIN or a passkey</Anchor> first.
+            {t.noFactorYet} <Anchor component={Link} to="/app/security">{t.addPinOrPasskey}</Anchor> {t.first}
           </Text>
         )}
       </Stack>

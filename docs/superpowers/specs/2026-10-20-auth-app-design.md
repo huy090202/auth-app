@@ -36,8 +36,11 @@ Decided in brainstorming on 2026-10-20 (not re-askable):
 ## 2. Non-goals (v1)
 
 Email verification, password reset, account recovery, remember-device, rate limiting,
-discoverable (username-less) passkeys, an admin UI, i18n for the demo screens (demo is
-EN only; only the docs are bilingual), running auth-gate locally.
+discoverable (username-less) passkeys, an admin UI, running auth-gate locally.
+
+**Decision, 2026-11-06:** the demo screens are bilingual (EN/VI) like the docs. This reverses
+the earlier "demo is EN only" non-goal. The demo follows the same language toggle; trace
+entries stay untranslated.
 
 ## 3. Architecture
 

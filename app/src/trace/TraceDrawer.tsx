@@ -2,6 +2,7 @@ import { Affix, Badge, Box, Button, Code, Collapse, Drawer, Group, Stack, Text, 
 import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router';
 import { monoFont } from '../theme';
+import { useStrings } from '../app/strings';
 import { traceStore, useTrace, type TraceEntry } from './TraceStore';
 
 export function toCurl(e: TraceEntry): string {
@@ -13,6 +14,7 @@ export function toCurl(e: TraceEntry): string {
 }
 
 function Entry({ e }: { e: TraceEntry }) {
+  const t = useStrings();
   const [open, setOpen] = useState(false);
   const ok = e.status < 400;
   return (
@@ -34,7 +36,7 @@ function Entry({ e }: { e: TraceEntry }) {
           <Code block ff={monoFont}>{JSON.stringify(e.responseBody ?? null, null, 2)}</Code>
           <Group>
             <Button size="compact-xs" variant="subtle" onClick={() => void navigator.clipboard?.writeText(toCurl(e))}>
-              Copy as curl
+              {t.traceCopyCurl}
             </Button>
           </Group>
         </Stack>
@@ -46,6 +48,7 @@ function Entry({ e }: { e: TraceEntry }) {
 const openedFromUrl = () => new URLSearchParams(window.location.search).get('trace') === '1';
 
 export function TraceDrawer() {
+  const t = useStrings();
   const entries = useTrace();
   const [opened, setOpened] = useState(openedFromUrl);
   // "Try it" in the docs is a client-side navigation, so watch the URL too.
@@ -64,17 +67,17 @@ export function TraceDrawer() {
       <Drawer opened={opened} onClose={() => setOpened(false)} position="right" size="lg"
         classNames={{ content: 'trace-drawer', header: 'trace-drawer-header' }}
         overlayProps={{ backgroundOpacity: 0.25, blur: 2 }}
-        title={<Text ff={monoFont} fw={600}>auth-gate calls</Text>}>
+        title={<Text ff={monoFont} fw={600}>{t.traceTitle}</Text>}>
         <Group mb="sm">
-          <Button size="xs" variant="default" onClick={() => traceStore.clear()} disabled={!entries.length}>Clear</Button>
+          <Button size="xs" variant="default" onClick={() => traceStore.clear()} disabled={!entries.length}>{t.traceClear}</Button>
           <Button size="xs" variant="default" disabled={!entries.length}
             onClick={() => void navigator.clipboard?.writeText(entries.map(toCurl).join('\n\n'))}>
-            Copy as curl
+            {t.traceCopyCurl}
           </Button>
         </Group>
         {entries.length === 0 ? (
           <Text c="dimmed" fz="sm">
-            Nothing yet. Every call the backend makes to AuthGate shows up here.
+            {t.traceEmpty}
           </Text>
         ) : (
           entries.map((e, i) => <Entry key={i} e={e} />)

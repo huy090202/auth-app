@@ -2,6 +2,7 @@ import { Loader } from '@mantine/core';
 import { useCallback, useEffect, useState, type ReactNode } from 'react';
 import { Navigate } from 'react-router';
 import { ApiError, api } from '../lib/api';
+import { useStrings, type Strings } from './strings';
 
 export type Passkey = { credentialId: string; createdAt: string; lastUsedAt?: string };
 export type Me = { username: string; email: string; factors: { pin: boolean; webauthn: Passkey[] } };
@@ -29,24 +30,25 @@ export function useMe(): { me: Me | null; status: Status; reload: () => Promise<
 /** Renders children only for a full session; otherwise sends the user to the right step. */
 export function SessionGuard({ children }: { children: (s: { me: Me; reload: () => Promise<void> }) => ReactNode }) {
   const { me, status, reload } = useMe();
-  if (status === 'loading') return <Loader size="sm" />;
+  const t = useStrings();
+  if (status === 'loading') return <Loader size="sm" aria-label={t.loading} />;
   if (status === 'anon') return <Navigate to="/app/login" replace />;
   if (status === 'half') return <Navigate to="/app/login/second-factor" replace />;
   return <>{children({ me: me!, reload })}</>;
 }
 
 /** One sentence for an error we do not handle specially. */
-export function describe(e: unknown): string {
-  if (!(e instanceof ApiError)) return e instanceof Error ? e.message : 'Something went wrong.';
+export function describe(e: unknown, t: Strings): string {
+  if (!(e instanceof ApiError)) return e instanceof Error ? e.message : t.somethingWrong;
   switch (e.code) {
     case 'network_error':
-      return 'Could not reach the server.';
+      return t.errNetwork;
     case 'authgate_unavailable':
-      return 'AuthGate is unavailable right now. Try again in a moment.';
+      return t.errUnavailable;
     case 'unauthorized':
-      return 'Your session ended. Sign in again.';
+      return t.errUnauthorized;
     default:
-      return `The server said ${e.code} (${e.status}).`;
+      return t.errUnknown(e.code, e.status);
   }
 }
 

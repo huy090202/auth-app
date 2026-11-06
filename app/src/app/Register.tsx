@@ -3,9 +3,11 @@ import { useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { ApiError, api } from '../lib/api';
 import { describe } from './session';
+import { useStrings } from './strings';
 
 export function Register() {
   const nav = useNavigate();
+  const t = useStrings();
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -22,7 +24,7 @@ export function Register() {
       await api('/api/auth/login', { body: { username, password } });
       nav('/app/security');
     } catch (e) {
-      setError(e instanceof ApiError && e.code === 'username_taken' ? 'That username is taken.' : describe(e));
+      setError(e instanceof ApiError && e.code === 'username_taken' ? t.registerTaken : describe(e, t));
     } finally {
       setBusy(false);
     }
@@ -30,21 +32,21 @@ export function Register() {
 
   return (
     <Stack maw={360}>
-      <Title order={1}>Create an account</Title>
+      <Title order={1}>{t.registerTitle}</Title>
       <Text c="dimmed" fz="sm">
-        The account lives in this app. auth-gate only holds the second factors you add next.
+        {t.registerIntro}
       </Text>
       <form onSubmit={submit}>
         <Stack>
-          <TextInput label="Username" value={username} onChange={(e) => setUsername(e.currentTarget.value)} required autoComplete="username" />
-          <TextInput label="Email" type="email" value={email} onChange={(e) => setEmail(e.currentTarget.value)} required autoComplete="email" />
-          <PasswordInput label="Password" value={password} onChange={(e) => setPassword(e.currentTarget.value)} required autoComplete="new-password" />
+          <TextInput label={t.username} value={username} onChange={(e) => setUsername(e.currentTarget.value)} required autoComplete="username" />
+          <TextInput label={t.email} type="email" value={email} onChange={(e) => setEmail(e.currentTarget.value)} required autoComplete="email" />
+          <PasswordInput label={t.password} value={password} onChange={(e) => setPassword(e.currentTarget.value)} required autoComplete="new-password" />
           {error && <Text c="red.7" fz="sm" role="alert">{error}</Text>}
-          <Button type="submit" loading={busy}>Create account</Button>
+          <Button type="submit" loading={busy}>{t.registerSubmit}</Button>
         </Stack>
       </form>
       <Text fz="sm">
-        Already have one? <Anchor component={Link} to="/app/login">Sign in</Anchor>
+        {t.haveAccount} <Anchor component={Link} to="/app/login">{t.signIn}</Anchor>
       </Text>
     </Stack>
   );

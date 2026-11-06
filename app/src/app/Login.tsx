@@ -4,11 +4,13 @@ import { Link, useNavigate } from 'react-router';
 import { ApiError, api } from '../lib/api';
 import { saveFactors, type LoginFactors } from './SecondFactor';
 import { describe } from './session';
+import { useStrings } from './strings';
 
 type LoginReply = { next: 'done' } | { next: 'second-factor'; factors: LoginFactors };
 
 export function Login() {
   const nav = useNavigate();
+  const t = useStrings();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -27,7 +29,7 @@ export function Login() {
         nav('/app/login/second-factor');
       }
     } catch (e) {
-      setError(e instanceof ApiError && e.code === 'invalid_credentials' ? 'Wrong username or password.' : describe(e));
+      setError(e instanceof ApiError && e.code === 'invalid_credentials' ? t.loginWrong : describe(e, t));
     } finally {
       setBusy(false);
     }
@@ -35,18 +37,18 @@ export function Login() {
 
   return (
     <Stack maw={360}>
-      <Title order={1}>Sign in</Title>
+      <Title order={1}>{t.loginTitle}</Title>
       <form onSubmit={submit}>
         <Stack>
-          <TextInput label="Username" value={username} onChange={(e) => setUsername(e.currentTarget.value)} required autoComplete="username" />
-          <PasswordInput label="Password" value={password} onChange={(e) => setPassword(e.currentTarget.value)} required autoComplete="current-password" />
+          <TextInput label={t.username} value={username} onChange={(e) => setUsername(e.currentTarget.value)} required autoComplete="username" />
+          <PasswordInput label={t.password} value={password} onChange={(e) => setPassword(e.currentTarget.value)} required autoComplete="current-password" />
           {error && <Text c="red.7" fz="sm" role="alert">{error}</Text>}
-          <Button type="submit" loading={busy}>Continue</Button>
+          <Button type="submit" loading={busy}>{t.continue}</Button>
         </Stack>
       </form>
       <Stack gap={4} fz="sm">
-        <Anchor component={Link} to="/app/login/passkey" fz="sm">Sign in with a passkey instead</Anchor>
-        <Anchor component={Link} to="/app/register" fz="sm">Create an account</Anchor>
+        <Anchor component={Link} to="/app/login/passkey" fz="sm">{t.loginWithPasskey}</Anchor>
+        <Anchor component={Link} to="/app/register" fz="sm">{t.createAccount}</Anchor>
       </Stack>
     </Stack>
   );
