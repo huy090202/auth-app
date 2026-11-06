@@ -22,7 +22,7 @@ so don't pass these responses straight through.
 
 | Status and code | What happened | What to do |
 |---|---|---|
-| `401 unauthorized` | The key is missing, wrong or past its 24-hour grace period, or AuthGate couldn't look it up. The body never says which. | Check your configured key. If it is right, retry before asking for a new one. |
+| `401 unauthorized` | The key is missing, wrong or past its grace period, your client is disabled, or AuthGate couldn't look it up. The body never says which. | Check your configured key. If it is right, retry before asking for a new one. |
 | `400 invalid_json` | The body isn't valid JSON, has a field of the wrong type or is over 1 MiB, is missing `credential` on a finish call, or doesn't send exactly one of `pin` and `credential` on a verify call. | Fix the request. |
 | `400 invalid_id` | `subjectId` or `purpose` is missing or empty, an id is over 256 bytes or contains `#`, or the `subjectId` of a passkey registration is over 64 bytes. | Fix the request. |
 | `400 wrong_factor` | `factor` isn't `pin` or `webauthn`, or the verify body doesn't match the challenge's factor. A mismatch uses up an attempt. | Fix the request. |

@@ -66,5 +66,12 @@ asking for a new key.
 The operator issues new keys. The new key works at once, and the previous one keeps working
 for 24 hours so you can redeploy without downtime.
 
-That also means rotating doesn't stop a leaked key straight away. If your key leaks, tell the
-operator immediately.
+That also means rotating alone doesn't stop a leaked key. If your key leaks, tell the operator
+immediately. The operator can:
+
+- **Replace the key now:** issue a new key, then end the previous key's 24 hours at once. Your
+  backend gets `401` until you deploy the new key.
+- **Disable your client:** all of its keys stop at once and get the same `401` as a wrong key, until
+  the operator enables the client again.
+
+Either way, tokens already issued stay valid until they expire, 15 minutes at most.
