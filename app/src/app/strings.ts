@@ -109,6 +109,7 @@ const en = {
   // Session and errors
   loading: 'Loading',
   somethingWrong: 'Something went wrong.',
+  retry: 'Try again',
   errNetwork: 'Could not reach the server.',
   errUnavailable: 'AuthGate is unavailable right now. Try again in a moment.',
   errUnauthorized: 'Your session ended. Sign in again.',
@@ -245,6 +246,7 @@ const vi: Strings = {
 
   loading: 'Đang tải',
   somethingWrong: 'Đã có lỗi xảy ra.',
+  retry: 'Thử lại',
   errNetwork: 'Không kết nối được với máy chủ.',
   errUnavailable: 'AuthGate đang tạm thời không khả dụng. Hãy thử lại sau ít phút.',
   errUnauthorized: 'Phiên đăng nhập đã hết. Hãy đăng nhập lại.',
