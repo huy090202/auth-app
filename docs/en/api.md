@@ -14,9 +14,12 @@ operator and isn't part of this API. See [Get your credentials](/docs/setup).
 - **Bodies:** JSON, at most 1 MiB. Unknown fields are ignored.
 - **Ids:** `subjectId`, `purpose` and ids in paths are 1 to 256 bytes with no `#`. Anything else
   gets `400 invalid_id`. A `subjectId` used with passkeys must be at most 64 bytes, or registration
-  answers `500 internal`. Prefer letters, digits, `-` and `_` for `subjectId`, and encode ids when
+  also answers `400 invalid_id`. Prefer letters, digits, `-` and `_` for `subjectId`, and encode ids when
   you put them in a URL.
 - **Times:** RFC 3339 strings, in UTC.
+- **Rate limit:** every call with a valid key counts toward your client's limit. Over it, any of
+  these calls can answer `429 {"error":"rate_limited"}` with `Retry-After` in whole seconds. The
+  public key set isn't limited.
 - **Errors:** a status plus `{"error": "<code>"}`. Any call can also answer `500 internal`. Each
   code is explained in [Errors](/docs/errors).
 

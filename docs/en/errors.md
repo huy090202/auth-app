@@ -16,6 +16,7 @@ so don't pass these responses straight through.
 | `400 pin_rejected` | A new PIN breaks the policy: wrong length, not all digits, a repeated digit, or a straight run. | Ask for a different PIN. |
 | `404 factor_not_found` | The subject has no factor of this kind. | Offer another factor. Offer enrollment only in a full session, after a step-up if the user has any factor. Otherwise someone who only knows the password can enroll their own PIN and pass 2FA. On passkey-only login, use the same answer you give an unknown username. |
 | `400 registration_failed` | The passkey response didn't verify, often because `rpId` or `origins` don't match the page. | Start the registration again. |
+| `429 rate_limited` + `Retry-After` | Your client went over its rate limit. The limit covers all your calls together, not each user. | Ask the user to try again shortly. Wait at least `Retry-After` seconds before repeating the call. |
 
 ## Errors that mean a bug or a setup problem
 
@@ -23,7 +24,7 @@ so don't pass these responses straight through.
 |---|---|---|
 | `401 unauthorized` | The key is missing, wrong or past its 24-hour grace period, or AuthGate couldn't look it up. The body never says which. | Check your configured key. If it is right, retry before asking for a new one. |
 | `400 invalid_json` | The body isn't valid JSON, has a field of the wrong type or is over 1 MiB, is missing `credential` on a finish call, or doesn't send exactly one of `pin` and `credential` on a verify call. | Fix the request. |
-| `400 invalid_id` | `subjectId` or `purpose` is missing or empty, or an id is over 256 bytes or contains `#`. | Fix the request. |
+| `400 invalid_id` | `subjectId` or `purpose` is missing or empty, an id is over 256 bytes or contains `#`, or the `subjectId` of a passkey registration is over 64 bytes. | Fix the request. |
 | `400 wrong_factor` | `factor` isn't `pin` or `webauthn`, or the verify body doesn't match the challenge's factor. A mismatch uses up an attempt. | Fix the request. |
 
 ## Errors on AuthGate's side
@@ -42,7 +43,10 @@ so don't pass these responses straight through.
 - **A correct PIN resets the failure count.**
 - **Passkeys don't lock.** The third failure on a passkey challenge answers `400` with
   `attemptsRemaining: 0`, and any later call answers `410`.
-- **A `subjectId` over 64 bytes breaks passkey registration.** The call answers `500 internal`, not a
-  `400`. See [Enroll a PIN or passkey](/docs/enroll).
+- **A `subjectId` over 64 bytes can't have a passkey.** Starting the registration answers
+  `400 invalid_id`, even though the same id works for a PIN. See [Enroll a PIN or passkey](/docs/enroll).
+- **A `429` changes nothing.** AuthGate rejects the call before running it, so it doesn't use up a PIN
+  attempt or a registration, and a challenge stays open until it expires. After `Retry-After`, a whole
+  number of seconds, repeat the same call.
 - **A token that fails verification is yours to handle.** AuthGate isn't involved at that point. Use
   your own `401` or `403`.

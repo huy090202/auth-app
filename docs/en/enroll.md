@@ -6,7 +6,7 @@ tryIt: /app/security
 
 A user needs a factor before you can challenge them. `subjectId` is your user id, and it must
 stay stable, so don't use the username. Stick to letters, digits, `-` and `_`, at most 64 bytes.
-AuthGate accepts up to 256 bytes with no `#`, but passkey registration answers `500 internal`
+AuthGate accepts up to 256 bytes with no `#`, but passkey registration answers `400 invalid_id`
 above 64. The id also reaches the browser and can appear in the passkey prompt, so keep anything
 private out of it.
 

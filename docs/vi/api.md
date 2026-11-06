@@ -14,9 +14,12 @@ trong API này. Xem [Lấy credentials](/docs/setup).
 - **Body:** JSON, tối đa 1 MiB. Field lạ sẽ bị bỏ qua.
 - **Id:** `subjectId`, `purpose` và các id trong path dài 1 đến 256 byte, không chứa `#`. Sai quy tắc
   thì nhận `400 invalid_id`. `subjectId` dùng với passkey phải dài tối đa 64 byte, nếu không call đăng
-  ký sẽ trả `500 internal`. `subjectId` nên chỉ gồm chữ cái, chữ số, `-` và `_`, và nhớ encode id khi
+  ký cũng trả `400 invalid_id`. `subjectId` nên chỉ gồm chữ cái, chữ số, `-` và `_`, và nhớ encode id khi
   đưa vào URL.
 - **Thời gian:** chuỗi RFC 3339, theo UTC.
+- **Rate limit:** mọi call có key hợp lệ đều tính vào limit của client. Vượt limit thì các call này có
+  thể trả `429 {"error":"rate_limited"}` kèm `Retry-After` tính bằng giây nguyên. Call lấy bộ public key
+  không bị giới hạn.
 - **Lỗi:** status kèm `{"error": "<code>"}`. Call nào cũng có thể trả `500 internal`. Từng mã được giải
   thích ở trang [Xử lý lỗi](/docs/errors).
 
