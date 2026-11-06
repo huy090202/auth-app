@@ -7,6 +7,6 @@
 | feat-rate-limited | feat/rate-limited | Map AuthGate 429 rate_limited in bff and demo; update docs for 429 and the passkey subjectId 400 | merged | 2026-11-06-2034 | PR #2 merged (ef95f5f); stg deployed; Task 18 Step 6 confirmed by Huy 2026-11-06, limit restored to 100/50; worktree and branch removed |
 | feat-operator-key-remedies | feat/operator-key-remedies | Docs: what the operator can do about a leaked key (end previous key's grace, disable client) | merged | | PR #3 merged (e3bdb01); stg deployed, bundle checked; worktree and branch removed |
 | feat-toc-active-heading | feat/toc-active-heading | Fix docs TOC: highlight the section you jumped to or scrolled to | merged | | PR #4 merged (f40adb1); stg deployed, TOC check green on stg; worktree and branch removed |
-| feat-session-transient-error | feat/session-transient-error | Demo: stop treating a failed session refresh (429, 502) as signed out | review | 2026-11-06-2200 | Pushed at 27d1414; PR not opened; not deployed |
+| feat-session-transient-error | feat/session-transient-error | Demo: stop treating a failed session refresh (429, 502) as signed out | merged | 2026-11-06-2200 | PR #5 merged (88a785a); stg deployed, check with /api mocked green on stg; worktree and branch removed |
 
 Status values: planned, active, review, merged, abandoned.
