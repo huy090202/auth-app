@@ -1,0 +1,11 @@
+info:
+  name: Cleanup
+  type: folder
+  seq: 5
+
+request: {}
+
+docs:
+  content: |-
+    Remove the PIN and sign out.
+  type: text/markdown

@@ -1,0 +1,33 @@
+info:
+  name: "Change email with the token"
+  type: http
+  seq: 4
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/me/email"
+  headers:
+    - name: Content-Type
+      value: "application/json"
+  body:
+    type: json
+    data: |-
+      { "email": "new-{{username}}@example.com", "stepUpToken": "{{stepUpToken}}" }
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("200 - email changed", function() {
+          expect(res.getStatus()).to.equal(200);
+          expect(res.getBody().email).to.equal("new-" + (bru.getVar("username") || bru.getEnvVar("username")) + "@example.com");
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  Same call, now carrying the step-up token. **Expected: 200 `{email}`.**

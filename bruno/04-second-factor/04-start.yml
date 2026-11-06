@@ -1,0 +1,36 @@
+info:
+  name: "Start the second factor"
+  type: http
+  seq: 4
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/auth/second-factor/start"
+  headers:
+    - name: Content-Type
+      value: "application/json"
+  body:
+    type: json
+    data: |-
+      { "factor": "pin" }
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        if (res.getStatus() === 200) bru.setVar("challengeId", res.getBody().challengeId);
+    - type: tests
+      code: |-
+        test("200 - challenge opened", function() {
+          expect(res.getStatus()).to.equal(200);
+          expect(res.getBody().challengeId).to.be.a("string").and.not.empty;
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  Opens a `login` challenge. **Expected: 200 `{challengeId, expiresAt}`.** Captures `challengeId`.

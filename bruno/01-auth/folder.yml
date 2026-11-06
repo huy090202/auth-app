@@ -1,0 +1,11 @@
+info:
+  name: Auth
+  type: folder
+  seq: 1
+
+request: {}
+
+docs:
+  content: |-
+    Register and sign in with a password. A user with no second factor is done after login.
+  type: text/markdown

@@ -1,0 +1,38 @@
+info:
+  name: "Verify the step-up with the PIN"
+  type: http
+  seq: 2
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/stepup/verify"
+  headers:
+    - name: Content-Type
+      value: "application/json"
+  body:
+    type: json
+    data: |-
+      { "challengeId": "{{challengeId}}", "pin": "{{pin}}" }
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        if (res.getStatus() === 200) bru.setVar("stepUpToken", res.getBody().stepUpToken);
+    - type: tests
+      code: |-
+        test("200 - step-up token issued", function() {
+          expect(res.getStatus()).to.equal(200);
+          expect(res.getBody().stepUpToken.split(".").length).to.equal(3);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  Verifies the challenge; bff checks the token (signature, issuer, audience, subject,
+  purpose) before handing it back. **Expected: 200 `{stepUpToken, expiresAt}`.**
+  Captures `stepUpToken`.

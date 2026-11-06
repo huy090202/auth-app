@@ -1,0 +1,12 @@
+bundled: false
+extensions: {}
+name: local
+variables:
+  - name: baseUrl
+    value: http://localhost:8787
+  - name: username
+    value: ""
+  - name: password
+    value: correct-horse-battery
+  - name: pin
+    value: "482916"

@@ -1,0 +1,33 @@
+info:
+  name: "Change email without a token"
+  type: http
+  seq: 3
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/me/email"
+  headers:
+    - name: Content-Type
+      value: "application/json"
+  body:
+    type: json
+    data: |-
+      { "email": "nope-{{username}}@example.com" }
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("403 - step_up_required", function() {
+          expect(res.getStatus()).to.equal(403);
+          expect(res.getBody().error).to.equal("step_up_required");
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  The sensitive action refuses a bare session. **Expected: 403 `step_up_required`.**

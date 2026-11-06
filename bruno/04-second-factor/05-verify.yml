@@ -1,0 +1,34 @@
+info:
+  name: "Verify the second factor with the PIN"
+  type: http
+  seq: 5
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/auth/second-factor/verify"
+  headers:
+    - name: Content-Type
+      value: "application/json"
+  body:
+    type: json
+    data: |-
+      { "challengeId": "{{challengeId}}", "pin": "{{pin}}" }
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("200 - signed in", function() {
+          expect(res.getStatus()).to.equal(200);
+          expect(res.getBody().next).to.equal("done");
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  bff checks the login token against JWKS and opens the full session.
+  **Expected: 200 `{next: "done"}`.**

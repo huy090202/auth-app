@@ -9,3 +9,4 @@ bruno/environments/*.yml
 .superpowers/
 dist/
 .aws-sam/
+*.tsbuildinfo

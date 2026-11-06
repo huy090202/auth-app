@@ -1,0 +1,26 @@
+info:
+  name: "No session is a 401"
+  type: http
+  seq: 1
+
+http:
+  method: GET
+  url: "{{baseUrl}}/api/me"
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("401 - unauthorized", function() {
+          expect(res.getStatus()).to.equal(401);
+          expect(res.getBody().error).to.equal("unauthorized");
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  Calls a protected route with no cookie. **Expected: 401 `unauthorized`.**

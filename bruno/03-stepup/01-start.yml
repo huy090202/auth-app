@@ -1,0 +1,38 @@
+info:
+  name: "Start a step-up"
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/stepup/start"
+  headers:
+    - name: Content-Type
+      value: "application/json"
+  body:
+    type: json
+    data: |-
+      { "purpose": "change-email", "factor": "pin" }
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        if (res.getStatus() === 200) bru.setVar("challengeId", res.getBody().challengeId);
+    - type: tests
+      code: |-
+        test("200 - challenge opened", function() {
+          expect(res.getStatus()).to.equal(200);
+          expect(res.getBody().challengeId).to.be.a("string").and.not.empty;
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  Opens an auth-gate challenge for the `change-email` purpose. **Expected: 200
+  `{challengeId, expiresAt}`.** Captures `challengeId`. An unknown purpose is a 400
+  `invalid_purpose` and never reaches auth-gate.

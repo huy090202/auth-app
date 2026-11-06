@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AuthGate Docs</title>
+    <meta name="description" content="AuthGate integration docs and a sample client." />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="theme-color" content="#eef4f0" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0b1411" media="(prefers-color-scheme: dark)" />
+    <!-- Same as Mantine ColorSchemeScript: set the scheme before first paint. -->
+    <script>
+      try {
+        var s = localStorage.getItem('mantine-color-scheme-value') || 'auto';
+        if (s === 'auto') s = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-mantine-color-scheme', s);
+      } catch (e) {}
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

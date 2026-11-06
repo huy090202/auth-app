@@ -1,0 +1,8 @@
+.doc pre { padding-right: 4.5rem; }
+.doc pre button.copy {
+  position: absolute; top: 6px; right: 6px;
+  font: 0.75rem system-ui, sans-serif; padding: 2px 8px; cursor: pointer;
+  color: var(--mantine-color-text); background: var(--mantine-color-body);
+  border: 1px solid var(--mantine-color-default-border); border-radius: 4px;
+}
+.doc table { font-size: 0.875rem; }

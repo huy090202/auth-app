@@ -1,0 +1,11 @@
+info:
+  name: Me
+  type: folder
+  seq: 2
+
+request: {}
+
+docs:
+  content: |-
+    The signed-in user's own data and PIN. Every route here needs a full (mfa) session.
+  type: text/markdown

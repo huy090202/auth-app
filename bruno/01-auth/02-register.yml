@@ -1,0 +1,35 @@
+info:
+  name: "Register"
+  type: http
+  seq: 2
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/auth/register"
+  headers:
+    - name: Content-Type
+      value: "application/json"
+  body:
+    type: json
+    data: |-
+      { "username": "{{username}}", "password": "{{password}}", "email": "{{username}}@example.com" }
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("201 - user created", function() {
+          expect(res.getStatus()).to.equal(201);
+          expect(res.getBody().username).to.equal(bru.getVar("username") || bru.getEnvVar("username"));
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  Creates the user in bff's own table (scrypt password hash). **Expected: 201 `{username}`.**
+
+  Registering the same username again is a 409 `username_taken`.
