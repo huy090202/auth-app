@@ -1,6 +1,6 @@
-import { Anchor, Button, Group, Stack } from '@mantine/core';
+import { Button } from '@mantine/core';
 import type { ReactNode } from 'react';
-import { Link, Navigate, Route, Routes, useNavigate } from 'react-router';
+import { NavLink, Navigate, Route, Routes, useNavigate } from 'react-router';
 import { demoTitle, useTitle } from '../brand';
 import { api } from '../lib/api';
 import { Home } from './Home';
@@ -30,14 +30,14 @@ function SignedIn({ title, children }: { title: string; children: ReactNode }) {
   };
   return (
     <div className="app-stage">
-    <Stack gap="lg" className="app-panel glass">
-      <Group gap="lg" pb="sm" style={{ borderBottom: '1px solid var(--mantine-color-default-border)' }}>
-        <Anchor component={Link} to="/app/home" fz="sm">Home</Anchor>
-        <Anchor component={Link} to="/app/security" fz="sm">Security</Anchor>
-        <Button size="compact-sm" variant="subtle" ml="auto" onClick={() => void logout()}>Sign out</Button>
-      </Group>
-      {children}
-    </Stack>
+      <div className="app-column">
+        <nav className="app-nav" aria-label="Account">
+          <NavLink to="/app/home" className="nav-link">Home</NavLink>
+          <NavLink to="/app/security" className="nav-link">Security</NavLink>
+          <Button size="compact-sm" variant="subtle" color="gray" ml="auto" onClick={() => void logout()}>Sign out</Button>
+        </nav>
+        {children}
+      </div>
     </div>
   );
 }
