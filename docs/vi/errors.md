@@ -22,7 +22,7 @@ nên đừng chuyển nguyên các response này ra ngoài.
 
 | Status và mã | Chuyện gì xảy ra | Nên làm gì |
 |---|---|---|
-| `401 unauthorized` | Key thiếu, sai, đã quá 24 giờ sau khi rotate, hoặc AuthGate không tra được key. Body không bao giờ nói rõ lý do. | Kiểm tra key đang cấu hình. Nếu key đúng thì thử lại trước khi xin key mới. |
+| `401 unauthorized` | Key thiếu, sai, đã hết thời gian dùng tiếp sau khi rotate, client của bạn bị disable, hoặc AuthGate không tra được key. Body không bao giờ nói rõ lý do. | Kiểm tra key đang cấu hình. Nếu key đúng thì thử lại trước khi xin key mới. |
 | `400 invalid_json` | Body không phải JSON hợp lệ, có field sai kiểu hoặc lớn quá 1 MiB, thiếu `credential` ở call finish, hoặc call verify không gửi đúng một trong hai `pin` và `credential`. | Sửa request. |
 | `400 invalid_id` | `subjectId` hoặc `purpose` bị thiếu hay rỗng, một id dài quá 256 byte hay chứa `#`, hoặc `subjectId` của registration passkey dài quá 64 byte. | Sửa request. |
 | `400 wrong_factor` | `factor` không phải `pin` hay `webauthn`, hoặc body của call verify không khớp với loại challenge. Trường hợp không khớp sẽ mất một lượt thử. | Sửa request. |
