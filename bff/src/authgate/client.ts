@@ -127,11 +127,11 @@ export class AuthGate {
       ms: Date.now() - started,
     });
     if (res.ok) return { status: res.status, body: parsed };
-    throw mapError(res.status, parsed);
+    throw mapError(res.status, parsed, res.headers);
   }
 }
 
-function mapError(status: number, body: unknown): AppError {
+function mapError(status: number, body: unknown, headers: Headers): AppError {
   const b = (body ?? {}) as Json;
   const code = typeof b.error === 'string' ? b.error : '';
   if (status >= 500) return new AppError(502, 'authgate_unavailable');
@@ -143,6 +143,10 @@ function mapError(status: number, body: unknown): AppError {
   if (status === 404 && code === 'factor_not_found') return new AppError(409, 'factor_not_enrolled');
   if (status === 400 && (code === 'registration_failed' || code === 'pin_rejected')) {
     return new AppError(400, code);
+  }
+  if (status === 429 && code === 'rate_limited') {
+    const retryAfter = headers.get('retry-after');
+    return new AppError(429, 'rate_limited', retryAfter && /^\d+$/.test(retryAfter) ? { retryAfter: Number(retryAfter) } : {});
   }
   return new AppError(502, 'authgate_unavailable', { upstream: code || String(status) });
 }
