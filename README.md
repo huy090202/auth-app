@@ -45,7 +45,7 @@ Scripts are in `scripts/setup-and-deploy/`, run in this order:
 4. `03-deploy.sh` - SAM stack, upload the site, invalidate CloudFront, print `BaseUrl`.
 5. `02-register-client.sh stg` - register with auth-gate; needs the `BaseUrl` from step 4.
 6. `03-deploy.sh` again, with `AUTHGATE_CLIENT_ID` set.
-7. `04-smoke.sh` - run the Bruno collection (`pnpm exec bru run --env stg` from `bruno/`) against the deployed site. Locally: `pnpm run bruno:local`.
+7. `04-smoke.sh` - run the Bruno collection (`bru run --env stg` from `bruno/`) against the deployed site. Locally: `pnpm run bruno:local`.
 
 `99-purge.sh` removes what the scripts created.
 
