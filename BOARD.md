@@ -10,6 +10,6 @@
 | feat-session-transient-error | feat/session-transient-error | Demo: stop treating a failed session refresh (429, 502) as signed out | merged | 2026-11-06-2200 | PR #5 merged (88a785a); stg deployed, check with /api mocked green on stg; worktree and branch removed |
 | feat-register-key-argv | feat/register-key-argv | Stop 02-register-client.sh putting the client key on jq argv | merged | 2026-11-07-1312 | PR #6 merged (0498035). Found: 00-deployer.sh:49 has the AWS secret key on argv, not fixed here |
 | feat-deployer-key-argv | feat/deployer-key-argv | Stop 00-deployer.sh putting the AWS secret access key on argv | merged | 2026-11-07-1405 | PR #7 merged (fed1a72). Found: real ~/.aws is on drvfs, mode 777, not fixed here |
-| feat-aws-credentials-mode | feat/aws-credentials-mode | Decide what to do about ~/.aws being mode 777 on drvfs | planned | analysis-2026-11-07 | Analysed: recommend moving to the Linux filesystem, no branch; waiting on Huy |
+| feat-aws-credentials-mode | feat/aws-credentials-mode | Decide what to do about ~/.aws being mode 777 on drvfs | planned | analysis-2026-11-07 | Huy approved moving to the Linux filesystem, no branch; commands given, waiting for confirmation |
 
 Status values: planned, active, review, merged, abandoned.
