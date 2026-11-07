@@ -79,8 +79,8 @@ if [[ "$target" == local ]]; then
   chmod 600 "$env_file"
   echo "registered $name ($client_id); wrote $env_file"
 else
-  jq -n --arg n "$PARAM_PREFIX/authgate-client-key" --arg v "$access_key" \
-    '{Name: $n, Type: "SecureString", Value: $v}' >"$tmpdir/param"
+  jq --arg n "$PARAM_PREFIX/authgate-client-key" \
+    '{Name: $n, Type: "SecureString", Value: .accessKey}' "$tmpdir/resp" >"$tmpdir/param"
   if ! aws ssm put-parameter --region "$REGION" --cli-input-json "file://$tmpdir/param" >/dev/null; then
     {
       echo "error: registered client $client_id but could not write $PARAM_PREFIX/authgate-client-key."
