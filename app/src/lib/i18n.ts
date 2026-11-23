@@ -13,7 +13,7 @@ function read(): Lang {
   }
 }
 
-/** The stored preference, for the demo and the one-time redirect. Null when storage is blocked or empty. */
+/** The stored preference, for the demo and the one-time redirect. Always a language: `en` when storage is blocked or empty. */
 export function storedLang(): Lang {
   return read();
 }

@@ -17,7 +17,7 @@ export function LogoMark({ size = 28 }: { size?: number }) {
 export function Brand() {
   const [lang] = useLang();
   return (
-    <Link to={localePath(lang, '/docs/what-it-is')} className="brand" aria-label="AuthGate Docs, home">
+    <Link to={localePath(lang, '/')} className="brand" aria-label="AuthGate, home">
       <LogoMark />
       <span className="word">AuthGate<span>Docs</span></span>
     </Link>
