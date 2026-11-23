@@ -30,6 +30,8 @@ function SchemeToggle() {
 
 export function App() {
   const [lang, setLang] = useLang();
+  // The prerendered file fixes <html lang>; keep it equal to the page language after a client-side change.
+  useEffect(() => { document.documentElement.lang = lang; }, [lang]);
   const { pathname } = useLocation();
   const inDocs = /^(\/vi)?\/docs(\/|$)/.test(pathname);
   const [navOpen, setNavOpen] = useState(false);

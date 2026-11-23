@@ -33,7 +33,7 @@ describe('prerendered output', () => {
     const sm = read('sitemap.xml');
     for (const r of routes) expect(sm, r.path).toContain(`<loc>${site}${r.path}</loc>`);
     expect(sm).toContain('hreflang="x-default"');
-    expect(read('robots.txt')).toBe(`User-agent: *\nAllow: /\nDisallow: /app/\nSitemap: ${site}/sitemap.xml\n`);
+    expect(read('robots.txt')).toBe(`User-agent: *\nAllow: /\nSitemap: ${site}/sitemap.xml\n`);
   });
   it('removed the SSR bundle', () => {
     expect(existsSync(new URL('../dist-ssr', dist))).toBe(false);

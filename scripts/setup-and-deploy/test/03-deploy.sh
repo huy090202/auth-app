@@ -9,12 +9,13 @@ root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
 tmp="$(mktemp -d)"
 trap 'rm -rf "$tmp"' EXIT
 mkdir -p "$tmp/bin" "$tmp/home" "$tmp/tree/scripts/setup-and-deploy" "$tmp/tree/infra" \
-  "$tmp/tree/bff/dist" "$tmp/tree/app/dist" "$tmp/tree/docs/en" "$tmp/tree/docs/vi"
+  "$tmp/tree/bff/dist" "$tmp/tree/app/dist" "$tmp/tree/docs/en" "$tmp/tree/docs/vi" "$tmp/tree/app/src/docs"
 cp "$root/scripts/setup-and-deploy/lib.sh" "$root/scripts/setup-and-deploy/domain.sh" \
   "$root/scripts/setup-and-deploy/03-deploy.sh" "$tmp/tree/scripts/setup-and-deploy/"
 : >"$tmp/tree/bff/dist/index.mjs"
 : >"$tmp/tree/app/dist/index.html"
 : >"$tmp/tree/infra/template.yaml"
+printf "export const slugs = [\n  'what-it-is', 'step-up',\n  'api',\n] as const;\n" >"$tmp/tree/app/src/docs/loader.ts"
 for l in en vi; do : >"$tmp/tree/docs/$l/step-up.md"; : >"$tmp/tree/docs/$l/api.md"; : >"$tmp/tree/docs/$l/what-it-is.md"; done
 export HOME="$tmp/home" AWS_CONFIG_FILE=/dev/null AWS_SHARED_CREDENTIALS_FILE=/dev/null
 export AWS_PROFILE=stub STAGE=t AWS_REGION=ap-southeast-1
@@ -84,6 +85,15 @@ if [ "$rc" -ne 0 ] && [ ! -s "$SAM_LOG" ] && grep -q docs/vi "$tmp/out"; then
   ok "DocSlugs: docs/en and docs/vi differing stops the deploy"
 else nok "docs mismatch did not stop the deploy (rc=$rc)"; cat "$SAM_LOG" "$tmp/out"; fi
 rm -f "$tmp/tree/docs/en/extra.md"
+
+# A slug the loader does not list: the deploy dies before sam.
+: >"$tmp/tree/docs/en/extra.md"
+: >"$tmp/tree/docs/vi/extra.md"
+run issued
+if [ "$rc" -ne 0 ] && [ ! -s "$SAM_LOG" ] && grep -q loader.ts "$tmp/out"; then
+  ok "DocSlugs: a docs slug missing from loader.ts stops the deploy"
+else nok "loader mismatch did not stop the deploy (rc=$rc)"; cat "$SAM_LOG" "$tmp/out"; fi
+rm -f "$tmp/tree/docs/en/extra.md" "$tmp/tree/docs/vi/extra.md"
 
 run issued AUTHGATE_BASE_URL=https://explicit.example/
 if grep -q -- "AuthGateBaseUrl=https://explicit.example " "$SAM_LOG" && grep -q -- "DomainName=authgatehq.com" "$SAM_LOG"; then

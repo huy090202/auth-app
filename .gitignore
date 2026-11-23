@@ -8,5 +8,6 @@ bruno/environments/*.yml
 !bruno/environments/*.example.yml
 .superpowers/
 dist/
+dist-ssr/
 .aws-sam/
 *.tsbuildinfo

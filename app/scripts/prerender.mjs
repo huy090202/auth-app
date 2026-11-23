@@ -51,7 +51,7 @@ await writeFile(
   join(dist, 'sitemap.xml'),
   `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n${entries.join('\n')}\n</urlset>\n`,
 );
-await writeFile(join(dist, 'robots.txt'), `User-agent: *\nAllow: /\nDisallow: /app/\nSitemap: ${site}/sitemap.xml\n`);
+await writeFile(join(dist, 'robots.txt'), `User-agent: *\nAllow: /\nSitemap: ${site}/sitemap.xml\n`);
 
 await rm(ssr, { recursive: true, force: true });
 console.log(`prerendered ${routes.length} pages, sitemap.xml, robots.txt`);
