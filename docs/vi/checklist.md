@@ -7,7 +7,7 @@ Làm lần lượt từ trên xuống. Bước sau cần bước trước.
 
 ## 1. Lấy credentials
 
-Chọn `rpId` và `origins`, rồi xin cấp client. Bạn sẽ nhận base URL, `clientId` và `accessKey`. Xem
+Chọn `rpId` và `origins`, rồi tạo client trên Portal. Bạn sẽ nhận base URL, `clientId` và `accessKey`. Xem
 [Lấy credentials](/docs/setup).
 
 ## 2. Thêm call AuthGate vào backend

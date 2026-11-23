@@ -10,8 +10,8 @@ Your backend is a *client* of AuthGate. Each client has its own key, users and s
 
 Sign up on the AuthGate Portal, then create the client yourself:
 
-1. Sign up at <https://portal.authgatehq.com/sign-up>.
-2. Confirm your email address from the mail the Portal sends you.
+1. Sign up at <https://portal.authgatehq.com/sign-up>. You set a password.
+2. Confirm your email address from the mail the Portal sends you. It asks for that password again.
 3. Enrol a PIN or a passkey.
 4. Create a client with these values. The key is shown once.
 

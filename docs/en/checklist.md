@@ -7,7 +7,7 @@ Work through these in order. Each step depends on the one before it.
 
 ## 1. Get your credentials
 
-Choose your `rpId` and `origins`, then request a client. You get a base URL, a `clientId`
+Choose your `rpId` and `origins`, then create a client in the Portal. You get a base URL, a `clientId`
 and an `accessKey`. See [Get your credentials](/docs/setup).
 
 ## 2. Add the AuthGate call to your backend

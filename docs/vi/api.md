@@ -3,7 +3,7 @@ title: Tham chiếu API
 ---
 # Tham chiếu API
 
-Đây là các call backend của bạn sẽ gọi. Tạo client và cấp key là việc của team vận hành, không nằm
+Đây là các call backend của bạn sẽ gọi. Bạn tự tạo client và key trên Portal, việc đó không nằm
 trong API này. Xem [Lấy credentials](/docs/setup).
 
 ## Quy ước
