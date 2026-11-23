@@ -33,20 +33,20 @@ so don't pass these responses straight through.
 |---|---|---|
 | `500 internal`, other 5xx, or a network error | AuthGate couldn't complete the call. | Show a generic notice, with no upstream detail. If it happened on a verify call, open a new challenge. |
 
-## Details worth knowing
+## How these errors behave
 
-- **Failures count per subject.** Opening a new challenge doesn't reset a PIN's failure count, and
+- Failures count per subject. Opening a new challenge doesn't reset a PIN's failure count, and
   `attemptsRemaining` only counts this challenge. After a new challenge, the lockout can come sooner
   than that number suggests, so don't present it as a guarantee.
-- **A lockout ends in two ways:** when `lockedUntil` passes, or when you enroll a new PIN. Enrolling
+- A lockout ends in two ways: when `lockedUntil` passes, or when you enroll a new PIN. Enrolling
   clears it, so [protect that route](/docs/enroll).
-- **A correct PIN resets the failure count.**
-- **Passkeys don't lock.** The third failure on a passkey challenge answers `400` with
+- A correct PIN resets the failure count.
+- Passkeys don't lock. The third failure on a passkey challenge answers `400` with
   `attemptsRemaining: 0`, and any later call answers `410`.
-- **A `subjectId` over 64 bytes can't have a passkey.** Starting the registration answers
+- A `subjectId` over 64 bytes can't have a passkey. Starting the registration answers
   `400 invalid_id`, even though the same id works for a PIN. See [Enroll a PIN or passkey](/docs/enroll).
-- **A `429` changes nothing.** AuthGate rejects the call before running it, so it doesn't use up a PIN
+- A `429` changes nothing. AuthGate rejects the call before running it, so it doesn't use up a PIN
   attempt or a registration, and a challenge stays open until it expires. After `Retry-After`, a whole
   number of seconds, repeat the same call.
-- **A token that fails verification is yours to handle.** AuthGate isn't involved at that point. Use
+- A token that fails verification is yours to handle. AuthGate isn't involved at that point. Use
   your own `401` or `403`.

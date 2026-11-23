@@ -12,7 +12,7 @@ Sign up on the AuthGate Portal, then create the client yourself:
 
 1. Sign up at <https://portal.authgatehq.com/sign-up>. You set a password.
 2. Confirm your email address from the mail the Portal sends you. It asks for that password again.
-3. Enrol a PIN or a passkey.
+3. Enroll a PIN or a passkey.
 4. Create a client with these values. The key is shown once.
 
 | Field | Required | Rules |
@@ -29,18 +29,18 @@ Choose `rpId` with care. Passkeys are bound to it, so moving to another domain m
 user enrolls again. If `rpId` or `origins` don't match the page, passkey calls fail.
 
 You can edit a client's name, origins, PIN policy and token lifetime later in the Portal.
-`rpId` cannot change. A user's factors belong to one client, so moving to a replacement client means every user enrolls
-again.
+`rpId` cannot change. A user's factors belong to one client, so moving to a replacement client means every
+user enrolls again.
 
 Use one client per environment. Local, staging and production have different origins, and
 this keeps their users and keys apart.
 
 ## What you get back
 
-- **Base URL:** the address your backend calls, written as `https://<authgate-host>` in these
+- Base URL: the address your backend calls, written as `https://<authgate-host>` in these
   docs.
-- **`clientId`:** tokens issued for you carry it as `aud`.
-- **`accessKey`:** a secret starting with `ag_`. It is shown only once, so put it in your
+- `clientId`: tokens issued for you carry it as `aud`.
+- `accessKey`: a secret starting with `ag_`. It is shown only once, so put it in your
   secret store straight away.
 
 ## Call AuthGate

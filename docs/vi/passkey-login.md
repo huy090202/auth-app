@@ -4,8 +4,8 @@ tryIt: /app/login/passkey
 ---
 # Đăng nhập chỉ bằng passkey
 
-Không cần mật khẩu. User nhập username, bạn tra user rồi mở challenge cho passkey của họ. AuthGate v1
-chưa có discoverable credential nên vẫn phải có username.
+User chỉ nhập username, không cần mật khẩu. Bạn tra user rồi mở challenge cho passkey của họ.
+AuthGate v1 chưa có discoverable credential nên vẫn phải có username.
 
 ```text
 browser          your backend                       AuthGate
@@ -22,8 +22,8 @@ browser          your backend                       AuthGate
 
 ## Backend của bạn
 
-Mở challenge. Username không tồn tại và user chưa có passkey phải nhận cùng một câu trả lời, để không
-ai dùng endpoint này dò được username nào có thật.
+Mở challenge. Trả cùng một câu trả lời cho username không tồn tại và cho user chưa có passkey, để
+không ai dùng endpoint này dò ra username nào có thật.
 
 ```ts
 const user = await findUserByUsername(username);
@@ -39,11 +39,12 @@ if (begin.status !== 201) return errorResponse();
 // Keep begin.data.challengeId in a short-lived pre-login session, send begin.data.publicKey to the browser.
 ```
 
-Cách này không giấu được hết: user có passkey vẫn nhận được options, nên người gọi biết tài khoản đó
-có passkey. Nhớ rate limit endpoint này.
+Nhớ rate limit endpoint này, vì cách trên không giấu được hết: user có passkey vẫn nhận về options,
+nên người gọi biết tài khoản đó có passkey.
 
-Verify câu trả lời. Lúc này user chưa đăng nhập, nên đọc `challengeId` từ session tạm trước login, lấy
-user từ `sub` trong token, vẫn kiểm tra đủ các mục còn lại, rồi xác nhận user đó có tồn tại bên bạn:
+Verify câu trả lời. Lúc này user chưa đăng nhập, nên đọc `challengeId` từ session tạm trước login,
+còn user thì lấy từ `sub` trong token. Các mục còn lại vẫn kiểm tra đủ. Cuối cùng, xác nhận user đó
+có tồn tại bên bạn:
 
 ```ts
 const { status, data } = await authGate('POST', `/api/challenges/${challengeId}/verify`, { credential });
@@ -70,9 +71,9 @@ const credential = serializeCredential(cred);
 
 ## Mức độ an toàn
 
-AuthGate không bắt buộc user verification. Đa số passkey sẽ hỏi sinh trắc học hoặc PIN của thiết bị,
-nhưng security key chỉ cần chạm cũng qua được, và token không cho biết đã xảy ra trường hợp nào. Hãy
-cân nhắc điều này trước khi để passkey là lớp bảo vệ duy nhất của tài khoản.
+AuthGate không bắt buộc user verification. Đa số passkey hỏi sinh trắc học hoặc PIN của thiết bị,
+nhưng security key chỉ cần chạm cũng qua được, và token không cho biết là trường hợp nào. Nhớ tính
+tới điểm này trước khi để passkey làm lớp bảo vệ duy nhất của tài khoản.
 
 ## Khi có lỗi
 

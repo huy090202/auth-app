@@ -4,13 +4,13 @@ tryIt: /app/security
 ---
 # Đăng ký PIN hoặc passkey
 
-User phải có yếu tố thì bạn mới mở challenge được. `subjectId` là user id bên bạn và phải cố định,
-nên đừng dùng username. Chỉ nên dùng chữ cái, chữ số, `-` và `_`, tối đa 64 byte. AuthGate nhận tới
-256 byte, không chứa `#`, nhưng đăng ký passkey sẽ trả `400 invalid_id` nếu dài quá 64. Id này còn được
-gửi tới browser và có thể hiện trong prompt passkey, nên đừng để thông tin riêng tư trong đó.
+User phải có yếu tố thì bạn mới mở challenge cho họ được. `subjectId` là user id bên bạn và phải cố
+định, nên đừng dùng username. Chỉ nên dùng chữ cái, chữ số, `-` và `_`, tối đa 64 byte. AuthGate nhận
+tới 256 byte, miễn không chứa `#`, nhưng id dài quá 64 byte thì đăng ký passkey trả `400 invalid_id`.
+Id này còn tới browser và có thể hiện trong prompt passkey, nên đừng để thông tin riêng tư trong đó.
 
-Chỉ cho đăng ký khi user đã đăng nhập, và lấy `subjectId` từ session, không bao giờ lấy từ request.
-Đăng ký PIN sẽ thay PIN cũ và xoá trạng thái khoá, nên nếu user đã có yếu tố thì phải
+Chỉ cho đăng ký khi user đã đăng nhập. Lấy `subjectId` từ session, không bao giờ lấy từ request.
+Đăng ký PIN thay PIN cũ và xoá trạng thái khoá, nên user nào đã có yếu tố thì phải
 [step-up](/docs/step-up) trước.
 
 ## PIN
@@ -19,12 +19,12 @@ Chỉ cho đăng ký khi user đã đăng nhập, và lấy `subjectId` từ ses
 const { status } = await authGate('POST', '/api/factors/pin', { subjectId: user.id, pin });
 ```
 
-Thành công trả `201`. PIN phải đúng độ dài trong policy và chỉ gồm chữ số. PIN lặp một số (`111111`)
-hoặc dãy liền nhau (`123456`, `654321`) sẽ nhận `400 pin_rejected`.
+Thành công thì nhận `201`. PIN phải đúng độ dài trong policy và chỉ gồm chữ số. PIN lặp một số
+(`111111`) hoặc là dãy liền nhau (`123456`, `654321`) thì nhận `400 pin_rejected`.
 
 ## Passkey
 
-Hai call, ở giữa là bước của browser:
+Có hai call, browser làm phần ở giữa:
 
 ```text
 browser              your backend                  AuthGate
@@ -37,7 +37,7 @@ browser              your backend                  AuthGate
   │ ◄── done
 ```
 
-Backend:
+Phía backend:
 
 ```ts
 const begin = await authGate('POST', '/api/webauthn/registrations', {
@@ -49,7 +49,7 @@ const begin = await authGate('POST', '/api/webauthn/registrations', {
 const finish = await authGate('POST', `/api/webauthn/registrations/${registrationId}`, { credential });
 ```
 
-Browser, dùng các hàm ở phần tiếp theo:
+Phía browser thì dùng các hàm ở phần tiếp theo:
 
 ```ts
 const cred = (await navigator.credentials.create({
@@ -59,13 +59,14 @@ const credential = serializeCredential(cred);
 // Send credential to your backend.
 ```
 
-Một registration sống năm phút và bị dùng hết ngay ở call finish đầu tiên có body đúng định dạng, kể
-cả khi call đó fail. Gặp `400 registration_failed` hoặc `410 challenge_gone` thì làm lại từ đầu.
+Registration có hiệu lực năm phút. Call finish đầu tiên có body đúng định dạng sẽ dùng hết
+registration, kể cả khi call đó fail. Gặp `400 registration_failed` hoặc `410 challenge_gone` thì làm
+lại từ đầu.
 
 ## Chuyển đổi dữ liệu WebAuthn
 
-AuthGate gửi và nhận chuỗi base64url, còn API của browser lại dùng `ArrayBuffer`. Copy các hàm này
-vào frontend của bạn. Login bằng passkey và step-up cũng cần chúng.
+AuthGate gửi và nhận chuỗi base64url, còn API của browser dùng `ArrayBuffer`. Copy các hàm này vào
+frontend. Login bằng passkey và step-up cũng dùng chúng.
 
 ```ts
 export function fromB64url(s: string): ArrayBuffer {
@@ -132,8 +133,8 @@ export function serializeCredential(cred: PublicKeyCredential) {
 | `DELETE /api/factors/pin/{subjectId}` | `204`, kể cả khi không có PIN |
 | `DELETE /api/webauthn/credentials/{credentialId}?subjectId={subjectId}` | `204`, kể cả khi không có passkey đó |
 
-Subject chưa từng thấy không phải là lỗi: call xem danh sách trả `{pin: false, webauthn: []}`. Khi
-đưa id vào path hoặc query thì encode bằng `encodeURIComponent`.
+Subject AuthGate chưa biết thì call xem danh sách vẫn trả `{pin: false, webauthn: []}`, không báo lỗi.
+Đưa id vào path hoặc query thì encode bằng `encodeURIComponent`.
 
-Khi xoá user, hãy lấy danh sách yếu tố của họ rồi gỡ từng cái, vì AuthGate không biết user bên bạn
-đã bị xoá.
+Xoá user bên bạn thì lấy danh sách yếu tố của họ rồi gỡ từng cái, vì AuthGate không biết user đó đã bị
+xoá.
