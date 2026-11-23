@@ -56,6 +56,164 @@ exist in SSM yet, so bff's config load throws at cold start and every `/api` cal
 (502), `/api/health` included, until the second pass. `02-register-client.sh stg` writes
 that key and prints the client id as `AUTHGATE_CLIENT_ID=...`; export it for step 6. `03-deploy.sh` and `02-register-client.sh` need
 `AUTHGATE_BASE_URL`; the register script also needs `AUTHGATE_ADMIN_KEY`.
+To serve on a custom domain see [Custom domain](#custom-domain).
+
+## Custom domain
+
+The site lives at the apex `https://authgatehq.com` (docs, demo and `/api` on one name). Its
+passkey rpId is `authgatehq.com`, and it calls AuthGate on `https://api.authgatehq.com`. The
+other apps have their own names (`portal.`, `admin.`, `api.`); the decision, the design and the
+shared certificate are in auth-gate's `docs/reference/custom-domain.md` and
+`docs/runbooks/rollout-custom-domain.md`. This repository only adds the apex.
+
+- **DNS only.** DNS is at Cloudflare and you create the records. No script writes DNS and no API
+  token exists. The record is DNS only (grey cloud), never proxied: a proxy would hide the
+  viewer's IP. The apex already carries MX and TXT records (Cloudflare Email Routing); adding the
+  `@` CNAME beside them is allowed, because Cloudflare flattens a CNAME at the apex.
+- **The certificate is auth-gate's.** `*.authgatehq.com` plus the apex, in `us-east-1`. Request it
+  there (`00-cert.sh`, wait for `ISSUED`). `00-domain.sh` only copies its ARN from
+  `/credo/auth-gate/<stage>/certificate-arn` into `/auth-app/<stage>/certificate-arn` and records
+  `/auth-app/<stage>/domain`. A deploy stops before `sam` unless the certificate is `ISSUED`.
+- **With no `domain` parameter nothing changes:** the deploy uses the CloudFront address.
+- **Forward-only per stack.** Once a stack was deployed with a domain, deleting the SSM parameters
+  does not move it back, because `sam deploy` reuses the previous values.
+- **The old address redirects.** Any other `Host` than the apex gets `301` to
+  `https://authgatehq.com<path and query>` on the site. `/api/*` is never redirected.
+- **Cost: demo users enrol again.** AuthGate refuses an rpId change, so auth-app gets a new client
+  and every PIN and passkey under the old one is gone. A demo account still exists, but its
+  owner sets a PIN or a passkey again.
+
+### Rollout (stg)
+
+Run it once, from this worktree, after auth-gate's rollout has reached its step 4 (certificate
+`ISSUED`, AuthGate live on `api.authgatehq.com`, auth-app already redeployed on that base URL).
+Admin steps use the admin profile `default`; the rest use the scripts' own defaults
+(`auth-app-deployer`, `ap-southeast-1`, stage `stg`), so set none of them. No secret goes on a
+command line. Do the steps in order and without long pauses: between step 3 and step 4 the old
+address redirects to a name that does not resolve yet.
+
+**1. The ACM right for the deployer.** The deployer reads the certificate's status.
+
+```bash
+(
+set -euo pipefail
+cd /home/work/auth-app/feat-custom-domain
+ADMIN_PROFILE=default scripts/setup-and-deploy/00-deployer.sh
+sleep 60   # IAM propagation
+)
+```
+
+**2. Record the domain.**
+
+```bash
+(
+set -euo pipefail
+cd /home/work/auth-app/feat-custom-domain
+ADMIN_PROFILE=default scripts/setup-and-deploy/00-domain.sh authgatehq.com
+)
+```
+
+Expect `domain:          authgatehq.com`, `certificate-arn: arn:aws:acm:us-east-1:...` and
+`Wrote /auth-app/stg/domain and /auth-app/stg/certificate-arn`.
+
+**3. Build and deploy on the new name.** The base URL defaults to `https://api.authgatehq.com`.
+`AUTHGATE_CLIENT_ID` stays unset, so the stack keeps the old client id for now.
+
+```bash
+cd /home/work/auth-app/feat-custom-domain && pnpm install --frozen-lockfile && (
+set -euo pipefail
+scripts/setup-and-deploy/02-build.sh
+scripts/setup-and-deploy/03-deploy.sh
+)
+```
+
+Expect `built bff/dist and app/dist`, the `sam` changeset, `invalidated <id>` and
+`BaseUrl: https://authgatehq.com`. A CloudFront update takes several minutes. The line
+`AUTHGATE_CLIENT_ID is empty: ...` is expected here: the stack keeps its client id.
+
+**4. The `@` record at Cloudflare.** Print the target (this is auth-gate's script, read only):
+
+```bash
+( cd /home/work/auth-gate/main && ADMIN_PROFILE=default AWS_REGION=ap-southeast-1 scripts/domain/dns-records.sh )
+```
+
+The `@` row shows the distribution name `<id>.cloudfront.net` once this stack has been deployed
+with the `DistributionDomain` output. Add it: Cloudflare dashboard, `authgatehq.com`, DNS,
+Records, Add record; Type `CNAME`, Name `@`, Target the name from the `@` row, Proxy status DNS
+only (grey cloud), Save. Add the record first, and query the name only afterwards: a resolver
+asked for the apex's A record before the CNAME existed may cache "no data" for up to 1800 s, and
+a smoke run too early fails with `ENOTFOUND`. Then check that it resolves:
+
+```bash
+for i in $(seq 10); do getent ahostsv4 authgatehq.com >/dev/null && printf 'ok ' || printf 'FAIL '; sleep 1; done; echo
+```
+
+Expect `ok ok ok ok ok ok ok ok ok ok`. If it prints `FAIL`, wait and run the loop again; do not
+go on until it is all `ok`.
+
+**5. Register the new client.** This reads the admin key from auth-gate's SSM parameter under
+the admin profile, into the environment of the subshell only, and asks you to type a
+confirmation. Note the old client id it prints.
+
+```bash
+cd /home/work/auth-app/feat-custom-domain && (
+set -euo pipefail
+export AUTHGATE_BASE_URL=https://api.authgatehq.com
+AUTHGATE_ADMIN_KEY="$(aws ssm get-parameter --profile default --region ap-southeast-1 \
+  --name /credo/auth-gate/stg/admin-key --with-decryption --query Parameter.Value --output text)"
+export AUTHGATE_ADMIN_KEY
+scripts/setup-and-deploy/02-register-client.sh stg --replace   # asks: Type 'replace auth-app-stg' ...
+)
+```
+
+Expect the prompt `Type 'replace auth-app-stg' to register a new client and overwrite the stored key:`;
+type exactly `replace auth-app-stg`. Then `registered auth-app-stg; wrote /auth-app/stg/authgate-client-key (SecureString)`,
+`AUTHGATE_CLIENT_ID=<new id>   # pass this to 03-deploy.sh` and
+`disable the old client <old id> in the Console once the new one works`. Write down both ids.
+If the script stops before the confirmation nothing has changed. Do not run this block twice: a
+second `--replace` registers another client and orphans the first.
+
+**6. Deploy with the new client id.**
+
+```bash
+cd /home/work/auth-app/feat-custom-domain && (
+set -euo pipefail
+read -r -p 'AUTHGATE_CLIENT_ID printed above: ' AUTHGATE_CLIENT_ID
+export AUTHGATE_CLIENT_ID
+scripts/setup-and-deploy/03-deploy.sh
+)
+```
+
+Expect `invalidated <id>` and `BaseUrl: https://authgatehq.com`, and no `AUTHGATE_CLIENT_ID is
+empty` line.
+
+**7. Smoke.**
+
+```bash
+cd /home/work/auth-app/feat-custom-domain && ( scripts/setup-and-deploy/04-smoke.sh )
+```
+
+Expect `bruno: https://authgatehq.com`, the Bruno run, the two `curl:` checks and `smoke ok`.
+
+**8. In a browser.** Open `https://authgatehq.com`, open the demo, register a demo account, set a
+PIN, then do a step-up. An account that existed under the old client sets its factor again the
+same way.
+
+**9. Disable the old client, then delete it.** Open the Console at `https://admin.authgatehq.com`,
+Clients, open the client whose id step 5 printed as the old one (the new one has the same name,
+`auth-app-stg`; the id tells them apart), Availability, Disable client. About a week later, if
+nothing broke, open it again and Delete client, and confirm.
+
+**10. The old address redirects.** Read only; path and query are kept, and the `q` value is
+unchanged:
+
+```bash
+curl -sS -o /dev/null -w '%{http_code} %{redirect_url}\n' 'https://d3d49hg6rb8ylx.cloudfront.net/docs/step-up?a=1&a=2&q=a%20b'
+```
+
+Expect `301 https://authgatehq.com/docs/step-up?a=1&a=2&q=a%20b`.
+
+If a line in step 5 or 6 fails, resume from that line; do not rerun the whole block.
 
 ## What to copy
 
