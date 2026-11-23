@@ -91,9 +91,10 @@ shared certificate are in auth-gate's `docs/reference/custom-domain.md` and
 
 ### Rollout (stg)
 
-Run it once, from this worktree, once auth-gate's custom-domain rollout is done, through its merge (its steps 1 to 7: certificate
+Start when auth-gate's custom-domain rollout is done and merged (its steps 1 to 7: certificate
 `ISSUED`, AuthGate live on `api.authgatehq.com`, auth-app already redeployed on that base URL).
-Merge this branch right after the rollout; until it is on `main`, deploy only from this worktree.
+Run every step from this worktree, and merge this branch at step 12; until it is on `main`,
+deploy only from this worktree.
 Admin steps use the admin profile `default`; the rest use the scripts' own defaults
 (`auth-app-deployer`, `ap-southeast-1`, stage `stg`), so set none of them. No secret goes on a
 command line. The apex record goes in before the deploy, so the name already resolves when the
@@ -235,6 +236,9 @@ curl -sS -o /dev/null -w '%{http_code} %{redirect_url}\n' 'https://d3d49hg6rb8yl
 ```
 
 Expect `301 https://authgatehq.com/docs/step-up?a=1&a=2&q=a%20b`.
+
+**12. Merge.** Push the branch, open the pull request and merge it, so `main` carries the domain
+template. From then on a deploy from `main` keeps the apex.
 
 If step 5 or 6 fails:
 
