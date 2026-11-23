@@ -62,7 +62,7 @@ export async function authGate(method: string, path: string, body?: unknown) {
 ```
 
 Thiếu key hoặc sai key thì nhận `401 {"error":"unauthorized"}`, không kèm lý do. Key chắc chắn
-đúng mà vẫn thoáng gặp `401` thì có thể do lỗi phía AuthGate. Thử lại trước khi xin key mới.
+đúng mà thỉnh thoảng vẫn gặp `401` thì có thể do lỗi phía AuthGate. Thử lại trước khi xin key mới.
 
 ## Đổi key
 

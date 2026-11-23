@@ -136,5 +136,5 @@ export function serializeCredential(cred: PublicKeyCredential) {
 Subject AuthGate chưa biết thì call xem danh sách vẫn trả `{pin: false, webauthn: []}`, không báo lỗi.
 Đưa id vào path hoặc query thì encode bằng `encodeURIComponent`.
 
-Xoá user bên bạn thì lấy danh sách yếu tố của họ rồi gỡ từng cái. AuthGate không biết user đó đã bị
+Xoá user bên bạn thì lấy danh sách yếu tố của họ rồi gỡ từng cái, vì AuthGate không biết user đó đã bị
 xoá.

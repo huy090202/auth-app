@@ -25,10 +25,10 @@ browser ◄── your session or your action
 
 ## Bạn tự lo những gì
 
-- User, mật khẩu và session: AuthGate chỉ biết `subjectId` bạn đưa, và không hiểu gì về nó.
+- User, mật khẩu và session: AuthGate chỉ biết `subjectId` bạn đưa, không biết id đó là ai.
 - Một backend đứng ra gọi mọi call: browser không bao giờ gọi thẳng AuthGate.
 - Mọi màn hình: form nhập PIN, prompt passkey, trang cài đặt.
-- Verify từng token, rồi quyết định token đó cho làm gì.
+- Verify từng token, rồi quyết định token đó cho phép làm gì.
 - Lúc nào cần hỏi: thao tác nào phải xác thực, chấp nhận yếu tố nào.
 - Khôi phục tài khoản: AuthGate không có flow reset. User mất PIN hoặc passkey thì bạn tự xác minh
   họ theo cách của bạn, rồi cho đăng ký lại.

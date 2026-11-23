@@ -12,7 +12,7 @@ Sign up on the AuthGate Portal, then create the client yourself:
 
 1. Sign up at <https://portal.authgatehq.com/sign-up>. You set a password.
 2. Confirm your email address from the mail the Portal sends you. It asks for that password again.
-3. Enrol a PIN or a passkey.
+3. Enroll a PIN or a passkey.
 4. Create a client with these values. The key is shown once.
 
 | Field | Required | Rules |

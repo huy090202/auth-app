@@ -33,7 +33,7 @@ so don't pass these responses straight through.
 |---|---|---|
 | `500 internal`, other 5xx, or a network error | AuthGate couldn't complete the call. | Show a generic notice, with no upstream detail. If it happened on a verify call, open a new challenge. |
 
-## Edge cases
+## How these errors behave
 
 - Failures count per subject. Opening a new challenge doesn't reset a PIN's failure count, and
   `attemptsRemaining` only counts this challenge. After a new challenge, the lockout can come sooner

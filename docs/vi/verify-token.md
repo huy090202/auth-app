@@ -61,5 +61,5 @@ Token còn ba claim khác, cần thì dùng:
 ## Key có thể đổi
 
 Mỗi lần verify, chọn key theo `kid`, đừng hard-code key trong code. Trong lúc rotate signing key, bộ
-key có thể có nhiều hơn một key. Bộ key có thể bị cache tối đa 300 giây. Key set của `jose` ở trên đã
+key có thể có nhiều hơn một key, và có thể bị cache tối đa 300 giây. Key set của `jose` ở trên đã
 tự lo chuyện cache lẫn `kid` lạ.

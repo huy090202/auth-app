@@ -22,7 +22,7 @@ AuthGate trả lỗi dạng status kèm `{"error": "<code>"}`. Backend của b�
 
 | Status và mã | Chuyện gì xảy ra | Nên làm gì |
 |---|---|---|
-| `401 unauthorized` | Key thiếu, sai, hoặc là key cũ đã hết thời gian chạy thêm sau khi đổi key. Cũng có thể client của bạn đang bị tắt, hoặc AuthGate không tra được key. Body không bao giờ nói rõ lý do. | Kiểm tra key đang cấu hình. Key đúng thì thử lại trước khi xin key mới. |
+| `401 unauthorized` | Key thiếu, sai, hoặc là key cũ đã quá thời gian còn dùng được sau khi đổi key. Cũng có thể client của bạn đang bị tắt, hoặc AuthGate không tra được key. Body không bao giờ nói rõ lý do. | Kiểm tra key đang cấu hình. Key đúng thì thử lại trước khi xin key mới. |
 | `400 invalid_json` | Body không phải JSON hợp lệ, có field sai kiểu hoặc lớn quá 1 MiB. Cũng có thể call finish thiếu `credential`, hoặc call verify không gửi đúng một trong hai `pin` và `credential`. | Sửa request. |
 | `400 invalid_id` | `subjectId` hoặc `purpose` bị thiếu hay rỗng, một id dài quá 256 byte hay chứa `#`, hoặc `subjectId` của registration passkey dài quá 64 byte. | Sửa request. |
 | `400 wrong_factor` | `factor` không phải `pin` hay `webauthn`, hoặc body của call verify không khớp với loại challenge. Gửi sai loại thì mất một lượt thử. | Sửa request. |
@@ -33,7 +33,7 @@ AuthGate trả lỗi dạng status kèm `{"error": "<code>"}`. Backend của b�
 |---|---|---|
 | `500 internal`, 5xx khác hoặc lỗi mạng | AuthGate không hoàn tất được call. | Hiện thông báo chung, đừng lộ chi tiết từ upstream. Lỗi xảy ra ở call verify thì mở challenge mới. |
 
-## Vài điểm cần để ý
+## Các lỗi này hoạt động ra sao
 
 - Số lần sai tính theo subject. Mở challenge mới không reset số lần sai PIN, còn `attemptsRemaining`
   chỉ tính trong challenge hiện tại. Vì vậy sau khi mở challenge mới, user có thể bị khoá sớm hơn con

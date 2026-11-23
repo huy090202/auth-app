@@ -67,7 +67,9 @@ exist in SSM yet, so bff's config load throws at cold start and every `/api` cal
 that key and prints the client id as `AUTHGATE_CLIENT_ID=...`; export it for step 6. `02-register-client.sh` needs
 `AUTHGATE_BASE_URL` and `AUTHGATE_ADMIN_KEY`; `03-deploy.sh` needs `AUTHGATE_BASE_URL` too, except
 with a domain configured, where it defaults to `https://api.<domain>`.
-To serve on a custom domain see the [custom domain runbook](docs/runbooks/rollout-custom-domain.md).
+auth-app serves on the domain recorded in SSM: `scripts/setup-and-deploy/00-domain.sh` records it,
+and `domain.sh` reads it for `03-deploy.sh`. The
+[custom domain runbook](docs/runbooks/rollout-custom-domain.md) is the record of how it was set up.
 
 The stg site URL is printed by `03-deploy.sh` as `BaseUrl`. The one-time rollouts already run on stg
 are runbooks: [custom domain](docs/runbooks/rollout-custom-domain.md) and

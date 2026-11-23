@@ -1,5 +1,12 @@
 # Custom domain
 
+> **Status: a record, not a procedure.** This file records the stg rollout run on 2026-11-23 from
+> the worktree of branch `feat/custom-domain`. That branch is now merged, so its worktree paths,
+> its "deploy only from this worktree" lines and its "merge this branch at step 12" are history.
+> Do not rerun it as a whole. In particular, step 5 (`02-register-client.sh stg --replace`)
+> registers a new client, and every demo user then has to enroll a PIN or a passkey again. It is
+> only for a new rpId.
+
 The site lives at the apex `https://authgatehq.com` (docs, demo and `/api` on one name). Its
 passkey rpId is `authgatehq.com`, and it calls AuthGate on `https://api.authgatehq.com`. The
 other apps have their own names (`portal.`, `admin.`, `api.`); the decision, the design and the

@@ -24,8 +24,12 @@ tên thao tác. Chỗ khác nằm ở cách bạn dùng token.
 
 ## Vì sao token phải đi kèm thao tác
 
-Trả token về frontend, để frontend gửi token kèm chính request thực hiện thao tác. Handler của thao
-tác verify token ngay tại đó:
+Mỗi token chỉ chứng minh một lần xác thực, cho một subject, cho một purpose. Nếu verify xong bạn chỉ
+set `steppedUp = true` vào session thì mất hết mấy ràng buộc đó: flag này dùng được cho mọi thao
+tác, miễn session còn hạn.
+
+Vì vậy, trả token về frontend, để frontend gửi token kèm chính request thực hiện thao tác. Handler
+của thao tác verify token ngay tại đó:
 
 ```ts
 await verifyAuthGateToken(body.stepUpToken, {
@@ -36,10 +40,6 @@ await verifyAuthGateToken(body.stepUpToken, {
 ```
 
 Hàm `verifyAuthGateToken` nằm ở trang [Verify token](/docs/verify-token).
-
-Mỗi token chỉ chứng minh một lần xác thực, cho một subject, cho một purpose. Nếu verify xong bạn chỉ
-set `steppedUp = true` vào session thì mất hết mấy ràng buộc đó: flag này dùng được cho mọi thao
-tác, miễn session còn hạn.
 
 ## Chọn purpose
 

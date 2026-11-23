@@ -1,5 +1,10 @@
 # Search engines
 
+> **Status: a record, not a procedure.** This file records the stg rollout run on 2026-11-23 from
+> the worktree of branch `feat/seo`. That branch is now merged, so its worktree path, its "deploy
+> only from this worktree" line and its "merge the branch" step 4 are history. Do not rerun it as
+> a whole.
+
 Google indexes the prerendered pages only: the landing (`/`, `/vi/`) and the docs
 (`/docs/<slug>`, `/vi/docs/<slug>`), each with a canonical URL and `hreflang` `en`, `vi` and
 `x-default`. The demo under `/app/...` is not indexed: its shell `index.html` carries

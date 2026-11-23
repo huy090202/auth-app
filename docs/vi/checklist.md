@@ -47,7 +47,7 @@ Tối thiểu phải xử lý sai PIN, bị khoá và challenge hết hạn. Xem
 
 - Mỗi môi trường có client riêng, và origin trên production là HTTPS.
 - `accessKey` nằm trong secret store, không bao giờ tới browser hay log.
-- Request log không chứa PIN và response của passkey.
+- Request log không ghi PIN hay response của passkey.
 - `subjectId` luôn lấy từ session hoặc từ bước tra user, không bao giờ lấy từ request.
 - Token nào cũng được kiểm tra chữ ký, `iss`, `aud`, `exp`, `purpose`, và cả `sub` nếu bạn biết
   trước đó là user nào.
