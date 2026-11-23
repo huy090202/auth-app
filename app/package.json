@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "tsc -b && vite build && vite build --ssr src/entry-server.tsx --outDir dist-ssr && node scripts/prerender.mjs",
+    "test:prerender": "vitest run --config vitest.prerender.config.ts",
     "typecheck": "tsc -b",
     "test": "vitest run --passWithNoTests",
     "lint": "eslint ."

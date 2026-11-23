@@ -76,11 +76,11 @@ export function renderDoc(body: string, lang: Lang = 'en'): { html: string; toc:
 }
 
 // docs/ also holds infra/ and superpowers/: glob only en/ and vi/ so they stay out of the bundle.
-const files = import.meta.glob('../../../docs/{en,vi}/*.md', { query: '?raw', import: 'default', eager: true }) as Record<string, string>;
+export const rawDocs = import.meta.glob('../../../docs/{en,vi}/*.md', { query: '?raw', import: 'default', eager: true }) as Record<string, string>;
 
 function load(lang: Lang): DocPage[] {
   return slugs.flatMap((slug) => {
-    const raw = files[`../../../docs/${lang}/${slug}.md`];
+    const raw = rawDocs[`../../../docs/${lang}/${slug}.md`];
     if (raw === undefined) return [];
     const { title, tryIt, signUp, body } = parseFrontmatter(raw);
     const { html, toc } = renderDoc(body, lang);
