@@ -2,6 +2,7 @@ import { Button } from '@mantine/core';
 import { useEffect, type MouseEvent } from 'react';
 import { Link, Navigate, useLocation, useParams } from 'react-router';
 import { docsTitle, useTitle } from '../brand';
+import { portalSignUpUrl } from '../lib/links';
 import { useLang } from '../lib/i18n';
 import { DocsLayout } from './DocsLayout';
 import { pages } from './loader';
@@ -35,6 +36,11 @@ export function DocsPage() {
   const key = `${lang}/${doc.slug}`;
   return (
     <DocsLayout toc={doc.toc} tocKey={key}>
+      {doc.signUp && (
+        <Button component="a" href={portalSignUpUrl} size="md" radius="md" className="sign-up">
+          {lang === 'vi' ? 'Đăng ký trên Portal' : 'Sign up on the Portal'}
+        </Button>
+      )}
       {/* Our own Markdown from the repo, rendered at build time: trusted HTML. */}
       <div className="doc" key={key} onClick={onCopy} dangerouslySetInnerHTML={{ __html: doc.html }} />
       {doc.tryIt && (

@@ -1,13 +1,19 @@
 ---
 title: Lấy credentials
+signUp: true
 ---
 # Lấy credentials
 
 Với AuthGate, backend của bạn là một *client*. Mỗi client có key, user và cấu hình riêng.
 
-## Xin cấp client
+## Tạo client
 
-Client do team vận hành AuthGate của bạn tạo. Gửi cho họ các thông tin sau:
+Bạn tự đăng ký trên AuthGate Portal rồi tự tạo client:
+
+1. Đăng ký tại <https://portal.authgatehq.com/sign-up>.
+2. Xác nhận địa chỉ email qua thư Portal gửi cho bạn.
+3. Thiết lập PIN hoặc passkey.
+4. Tạo client với các thông tin sau. Key chỉ hiện một lần.
 
 | Field | Bắt buộc | Quy tắc |
 |---|---|---|
@@ -22,8 +28,8 @@ Client do team vận hành AuthGate của bạn tạo. Gửi cho họ các thôn
 Chọn `rpId` cho kỹ. Passkey gắn chặt với nó, nên chuyển sang domain khác là mọi user phải đăng ký
 lại. `rpId` hoặc `origins` không khớp với trang thì các call passkey sẽ fail.
 
-Liệt kê đủ các origin bạn sẽ cần ngay từ đầu, và trao đổi với team vận hành trước khi cần thay đổi.
-Yếu tố của user thuộc về một client, nên chuyển sang client thay thế là mọi user phải đăng ký lại.
+Sau này bạn vẫn sửa được tên, origin, PIN policy và thời gian sống của token ngay trên Portal.
+Riêng `rpId` thì không đổi được. Yếu tố của user thuộc về một client, nên chuyển sang client thay thế là mọi user phải đăng ký lại.
 
 Mỗi môi trường nên có một client riêng. Local, staging và production có origin khác nhau, và tách
 ra thì user với key của chúng không lẫn vào nhau.

@@ -3,14 +3,14 @@ import type { Lang } from '../lib/i18n';
 import { highlight } from './highlight';
 
 export type TocItem = { id: string; text: string; depth: 2 | 3 };
-export type DocPage = { slug: string; lang: Lang; title: string; tryIt?: string; html: string; toc: TocItem[] };
+export type DocPage = { slug: string; lang: Lang; title: string; tryIt?: string; signUp?: boolean; html: string; toc: TocItem[] };
 
 export const slugs = [
   'what-it-is', 'checklist', 'setup', 'enroll', '2fa-login', 'passkey-login', 'step-up', 'verify-token', 'api', 'errors',
 ] as const;
 
-/** `---\ntitle: …\ntryIt: …\n---` then the body. Only those two keys. */
-export function parseFrontmatter(raw: string): { title: string; tryIt?: string; body: string } {
+/** `---\ntitle: …\ntryIt: …\nsignUp: true\n---` then the body. Only those three keys; `signUp` counts only when it is `true`. */
+export function parseFrontmatter(raw: string): { title: string; tryIt?: string; signUp?: boolean; body: string } {
   const m = /^---\r?\n([\s\S]*?)\r?\n---\r?\n?/.exec(raw);
   if (!m) return { title: '', body: raw };
   const meta: Record<string, string> = {};
@@ -18,8 +18,9 @@ export function parseFrontmatter(raw: string): { title: string; tryIt?: string; 
     const i = line.indexOf(':');
     if (i > 0) meta[line.slice(0, i).trim()] = line.slice(i + 1).trim();
   }
-  const out: { title: string; tryIt?: string; body: string } = { title: meta.title ?? '', body: raw.slice(m[0].length) };
+  const out: { title: string; tryIt?: string; signUp?: boolean; body: string } = { title: meta.title ?? '', body: raw.slice(m[0].length) };
   if (meta.tryIt) out.tryIt = meta.tryIt;
+  if (meta.signUp === 'true') out.signUp = true;
   return out;
 }
 
@@ -74,9 +75,9 @@ function load(lang: Lang): DocPage[] {
   return slugs.flatMap((slug) => {
     const raw = files[`../../../docs/${lang}/${slug}.md`];
     if (raw === undefined) return [];
-    const { title, tryIt, body } = parseFrontmatter(raw);
+    const { title, tryIt, signUp, body } = parseFrontmatter(raw);
     const { html, toc } = renderDoc(body);
-    return [tryIt ? { slug, lang, title, tryIt, html, toc } : { slug, lang, title, html, toc }];
+    return [{ slug, lang, title, ...(tryIt ? { tryIt } : {}), ...(signUp ? { signUp } : {}), html, toc }];
   });
 }
 

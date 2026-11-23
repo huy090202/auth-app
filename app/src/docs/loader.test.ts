@@ -10,6 +10,10 @@ describe('parseFrontmatter', () => {
   it('leaves tryIt out when absent', () => {
     expect(parseFrontmatter('---\ntitle: A: b\n---\nx')).toEqual({ title: 'A: b', body: 'x' });
   });
+  it('reads signUp only when it is true', () => {
+    expect(parseFrontmatter('---\ntitle: A\nsignUp: true\n---\nx')).toEqual({ title: 'A', signUp: true, body: 'x' });
+    expect(parseFrontmatter('---\ntitle: A\nsignUp: false\n---\nx')).toEqual({ title: 'A', body: 'x' });
+  });
   it('passes through text without frontmatter', () => {
     expect(parseFrontmatter('# x')).toEqual({ title: '', body: '# x' });
   });

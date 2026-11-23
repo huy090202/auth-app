@@ -1,13 +1,19 @@
 ---
 title: Get your credentials
+signUp: true
 ---
 # Get your credentials
 
 Your backend is a *client* of AuthGate. Each client has its own key, users and settings.
 
-## Request a client
+## Create a client
 
-The team that operates your AuthGate creates clients. Send them these values:
+Sign up on the AuthGate Portal, then create the client yourself:
+
+1. Sign up at <https://portal.authgatehq.com/sign-up>.
+2. Confirm your email address from the mail the Portal sends you.
+3. Enrol a PIN or a passkey.
+4. Create a client with these values. The key is shown once.
 
 | Field | Required | Rules |
 |---|---|---|
@@ -22,8 +28,8 @@ The team that operates your AuthGate creates clients. Send them these values:
 Choose `rpId` with care. Passkeys are bound to it, so moving to another domain means every
 user enrolls again. If `rpId` or `origins` don't match the page, passkey calls fail.
 
-List every origin you will need up front, and talk to the operator before you need a change.
-A user's factors belong to one client, so moving to a replacement client means every user enrolls
+You can edit a client's name, origins, PIN policy and token lifetime later in the Portal.
+`rpId` cannot change. A user's factors belong to one client, so moving to a replacement client means every user enrolls
 again.
 
 Use one client per environment. Local, staging and production have different origins, and
