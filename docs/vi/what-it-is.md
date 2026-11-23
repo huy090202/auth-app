@@ -26,7 +26,7 @@ browser ◄── your session or your action
 ## Bạn tự lo những gì
 
 - User, mật khẩu và session: AuthGate chỉ biết `subjectId` bạn đưa, không biết id đó là ai.
-- Một backend đứng ra gọi mọi call: browser không bao giờ gọi thẳng AuthGate.
+- Mọi lời gọi AuthGate đi từ backend: browser không bao giờ gọi thẳng AuthGate.
 - Mọi màn hình: form nhập PIN, prompt passkey, trang cài đặt.
 - Verify từng token, rồi quyết định token đó cho phép làm gì.
 - Lúc nào cần hỏi: thao tác nào phải xác thực, chấp nhận yếu tố nào.
