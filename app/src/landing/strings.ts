@@ -36,7 +36,7 @@ export const landingStrings: Record<Lang, LandingStrings> = {
     description:
       'AuthGate checks a PIN or a passkey for your users. Your backend opens a challenge and gets a short-lived signed token to verify. Docs, code and a live demo.',
     headline: 'A second factor for any backend',
-    lead: 'Ask for a PIN or a passkey before a sensitive action. Your backend calls AuthGate, the user answers, and you get a short-lived signed token that you verify yourself.',
+    lead: 'Ask for a PIN or a passkey before a sensitive action. Your backend calls AuthGate, the user answers, and you get a short-lived token signed with AWS KMS that you verify yourself.',
     signUp: 'Sign up on the Portal',
     demo: 'Try the demo',
     docs: 'Read the docs',
@@ -53,12 +53,13 @@ export const landingStrings: Record<Lang, LandingStrings> = {
     featTitle: "What you don't have to build",
     featSub: 'The parts of 2FA that are easy to get wrong.',
     feats: [
-      { title: 'PINs', body: 'Hashed storage, a length policy, trivial PINs refused, and a lockout after repeated failures.' },
+      { title: 'PINs', body: 'Hashed with argon2id, a length policy, trivial PINs refused, and a lockout after repeated failures.' },
       { title: 'Passkeys', body: 'WebAuthn options for the browser, and verification of the answer, including the rpId and origin.' },
-      { title: 'Signed tokens', body: 'ES256 JWTs, 5 minutes by default and 15 at most. Verify them with the public key set.' },
-      { title: 'Single-use challenges', body: 'Valid for five minutes and visible only to your client.' },
+      { title: 'Signed tokens', body: 'ES256, signed in AWS KMS, 5 minutes by default and 15 at most. Verify offline with the public key set.' },
+      
       { title: 'Keys and limits', body: 'Rotate a client key with a 24-hour grace, end it early, and a rate limit per client.' },
       { title: 'Self-service', body: 'Sign up, confirm your email, enrol a second factor and create your client on the Portal.' },
+      { title: 'Serverless', body: 'Go on AWS Lambda behind CloudFront, with DynamoDB and KMS. No servers to run.' },
     ],
     ctaTitle: 'Try it in five minutes',
     ctaSub: 'Register a demo account, set a PIN, and watch every call the demo makes.',
@@ -72,7 +73,7 @@ export const landingStrings: Record<Lang, LandingStrings> = {
     description:
       'AuthGate kiểm tra PIN hoặc passkey cho user của bạn. Backend mở challenge và nhận token ký sẵn, sống ngắn để verify. Có tài liệu, code mẫu và demo chạy thật.',
     headline: 'Yếu tố xác thực thứ hai cho mọi backend',
-    lead: 'Hỏi PIN hoặc passkey trước một thao tác nhạy cảm. Backend của bạn gọi AuthGate, user trả lời, và bạn nhận về một token ký sẵn, sống ngắn để tự verify.',
+    lead: 'Hỏi PIN hoặc passkey trước một thao tác nhạy cảm. Backend của bạn gọi AuthGate, user trả lời, và bạn nhận về một token sống ngắn, ký bằng AWS KMS, để tự verify.',
     signUp: 'Đăng ký trên Portal',
     demo: 'Chạy thử demo',
     docs: 'Đọc tài liệu',
@@ -89,12 +90,13 @@ export const landingStrings: Record<Lang, LandingStrings> = {
     featTitle: 'Những việc bạn không phải tự làm',
     featSub: 'Những phần của 2FA rất dễ làm sai.',
     feats: [
-      { title: 'PIN', body: 'Lưu dạng hash, có policy về độ dài, từ chối PIN quá dễ đoán, và khoá sau nhiều lần nhập sai.' },
+      { title: 'PIN', body: 'Hash bằng argon2id, có policy về độ dài, từ chối PIN quá dễ đoán, và khoá sau nhiều lần nhập sai.' },
       { title: 'Passkey', body: 'Tạo WebAuthn options cho browser và verify kết quả trả về, gồm cả rpId và origin.' },
-      { title: 'Token ký sẵn', body: 'JWT ký ES256, mặc định sống 5 phút, tối đa 15 phút. Verify bằng bộ public key.' },
-      { title: 'Challenge dùng một lần', body: 'Sống năm phút và chỉ client của bạn mới thấy.' },
+      { title: 'Token ký sẵn', body: 'JWT ký ES256 trong AWS KMS, mặc định sống 5 phút, tối đa 15 phút. Verify offline bằng bộ public key.' },
+      
       { title: 'Key và giới hạn', body: 'Xoay key của client với 24 giờ chuyển tiếp, thu hồi sớm khi cần, và có rate limit cho từng client.' },
       { title: 'Tự phục vụ', body: 'Đăng ký, xác nhận email, thêm yếu tố thứ hai và tạo client ngay trên Portal.' },
+      { title: 'Serverless', body: 'Viết bằng Go, chạy trên AWS Lambda sau CloudFront, dùng DynamoDB và KMS. Không có server nào để bạn vận hành.' },
     ],
     ctaTitle: 'Thử trong năm phút',
     ctaSub: 'Tạo một tài khoản demo, đặt PIN và xem từng call mà demo gửi đi.',

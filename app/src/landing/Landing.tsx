@@ -27,7 +27,7 @@ export function Landing() {
         <div className="glass code">
           <pre><code>
             <span className="c">{s.codeComment1}</span>{'\n'}
-            <span className="k">POST</span>{' /api/challenges\nx-internal-access-key: <accessKey>\n{"subjectId":"u_42","purpose":"change-email","factor":"pin"}\n\n'}
+            <span className="k">POST</span>{' /api/challenges\nx-internal-access-key: ag_…\n{"subjectId":"u_42","purpose":"change-email","factor":"pin"}\n\n'}
             <span className="c">{s.codeComment2}</span>{'\n'}
             <span className="k">POST</span>{' /api/challenges/{challengeId}/verify\n{"pin":"482913"}\n\n'}
             <span className="c">{s.codeComment3}</span>{'\n{"token":"eyJhbGciOiJFUzI1NiIs…","expiresAt":"…","factor":"pin"}'}
