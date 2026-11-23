@@ -3,11 +3,11 @@ title: Verify token
 ---
 # Verify token
 
-Token trả về từ AuthGate qua kết nối của chính bạn thì cũng đừng tin ngay. Lần nào cũng phải verify,
-kể cả khi browser gửi lại token cho bạn lúc step-up.
+Lần nào nhận token cũng phải verify, kể cả khi browser gửi token lại cho bạn lúc step-up. Token về
+từ AuthGate qua kết nối của chính bạn cũng đừng tin ngay.
 
-Đoạn code này dùng [`jose`](https://github.com/panva/jose) và không cần gì thêm. Nếu dùng ngôn ngữ
-khác, chọn một thư viện JOSE rồi kiểm tra đúng những mục này.
+Code mẫu dưới đây chỉ cần [`jose`](https://github.com/panva/jose). Dùng ngôn ngữ khác thì chọn một
+thư viện JOSE rồi kiểm tra đúng những mục này.
 
 ```ts
 import { createRemoteJWKSet, jwtVerify } from 'jose';
@@ -36,7 +36,8 @@ export async function verifyAuthGateToken(
 }
 ```
 
-Có gì sai là hàm throw. Đổi nó thành lỗi của riêng bạn, và đừng cho người gọi biết bước nào fail.
+Kiểm tra nào fail thì hàm cũng throw. Đổi lỗi đó thành lỗi của riêng bạn, và đừng cho người gọi biết
+bước nào fail.
 
 ## Cần kiểm tra những gì
 
@@ -46,19 +47,19 @@ Có gì sai là hàm throw. Đổi nó thành lỗi của riêng bạn, và đ�
 | `iss` | bằng base URL của bạn, ví dụ `https://<authgate-host>` |
 | `aud` | bằng `clientId` của bạn |
 | `exp` | chưa tới |
-| `sub` | đúng user bạn đang chờ, nếu biết trước. Với đăng nhập chỉ bằng passkey, đây là cách bạn biết user là ai. |
+| `sub` | đúng user bạn đang chờ, nếu biết trước. Lúc đăng nhập chỉ bằng passkey, claim này cho bạn biết user là ai. |
 | `purpose` | đúng thao tác bạn sắp cho phép |
 
-Có thêm ba claim nữa nếu bạn cần:
+Token còn ba claim khác, cần thì dùng:
 
 | Claim | Ý nghĩa |
 |---|---|
-| `amr` | `["pin"]` hoặc `["webauthn"]`: yếu tố đã dùng. Phải kiểm tra nếu thao tác chỉ chấp nhận một số yếu tố nhất định. |
+| `amr` | `["pin"]` hoặc `["webauthn"]`: yếu tố user đã dùng. Thao tác nào chỉ chấp nhận một số yếu tố thì phải kiểm tra claim này. |
 | `iat` | thời điểm cấp token |
-| `jti` | id của challenge, mỗi token một giá trị. Lưu lại nếu bạn cần [dùng một lần](/docs/step-up#chi-dung-mot-lan). |
+| `jti` | id của challenge, mỗi token một giá trị. Cần token [dùng một lần](/docs/step-up#chi-dung-mot-lan) thì lưu lại. |
 
 ## Key có thể đổi
 
-Mỗi lần verify, chọn key theo `kid`, đừng hard-code key trong code. Bộ key có thể có nhiều hơn một key
-trong lúc rotate signing key. Bộ này được cache tối đa 300 giây, và key set của `jose` ở trên đã tự lo
-chuyện cache lẫn `kid` lạ.
+Mỗi lần verify, chọn key theo `kid`, đừng hard-code key trong code. Trong lúc rotate signing key, bộ
+key có thể có nhiều hơn một key. Bộ key có thể bị cache tối đa 300 giây. Key set của `jose` ở trên đã
+tự lo chuyện cache lẫn `kid` lạ.
