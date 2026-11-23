@@ -71,7 +71,7 @@ thứ hai. Key mới dùng được ngay, còn key cũ vẫn chạy thêm 24 gi�
 gián đoạn.
 
 Điều đó cũng có nghĩa là chỉ rotate thì không chặn được key đã lộ. Nếu key bị lộ, hãy rotate, rồi
-chấm dứt luôn 24 giờ của key cũ ngay trên cùng trang ("Revoke previous keys"). Backend của bạn sẽ
+chấm dứt luôn 24 giờ của key cũ ngay trên cùng trang ("Thu hồi các khóa cũ"). Backend của bạn sẽ
 nhận `401` cho tới khi deploy key mới.
 
 Hoặc disable client ngay tại đó. Mọi key của client ngừng hoạt động ngay và nhận `401` giống hệt
