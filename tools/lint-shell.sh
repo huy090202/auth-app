@@ -3,6 +3,6 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 shopt -s nullglob globstar
-files=(tools/lint-shell.sh scripts/setup-and-deploy/*.sh tools/wt/*.sh tools/wt/test/*.sh .claude/**/*.sh)
+files=(tools/lint-shell.sh scripts/setup-and-deploy/*.sh scripts/setup-and-deploy/test/*.sh tools/wt/*.sh tools/wt/test/*.sh .claude/**/*.sh)
 ((${#files[@]})) || exit 0
 exec pnpm exec shellcheck -x "${files[@]}"

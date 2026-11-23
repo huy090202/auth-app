@@ -200,6 +200,7 @@ nav > div:first-child > .nav-group { padding-top: 0; }
 .hljs-built_in, .hljs-type { color: var(--tok-builtin); }
 
 .try-it { margin-top: 32px; }
+.sign-up { margin-bottom: 24px; }
 
 /* Demo: auth screens centred, signed-in screens as a column of glass panels. */
 .auth-stage { min-height: calc(100vh - var(--header-h)); display: grid; place-items: center; padding: 32px 16px 15vh; }

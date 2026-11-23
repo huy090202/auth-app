@@ -27,6 +27,12 @@
       ]
     },
     {
+      "Sid": "ReadTheCertificate",
+      "Effect": "Allow",
+      "Action": "acm:DescribeCertificate",
+      "Resource": "arn:aws:acm:us-east-1:826113468815:certificate/*"
+    },
+    {
       "Sid": "ManageTheSiteBucket",
       "Effect": "Allow",
       "Action": "s3:*",

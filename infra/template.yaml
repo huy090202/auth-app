@@ -19,6 +19,19 @@ Parameters:
     Type: String
     Default: "1"
     AllowedValues: ["0", "1"]
+  DomainName:
+    Type: String
+    Default: ""
+    AllowedPattern: '^$|^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+$'
+    Description: Optional custom domain of the site (set by the deploy script from SSM). Needs CertificateArn.
+  CertificateArn:
+    Type: String
+    Default: ""
+    AllowedPattern: '^$|^arn:aws:acm:us-east-1:\d{12}:certificate/[0-9a-f-]+$'
+    Description: ACM certificate in us-east-1 for DomainName (set by the deploy script from SSM).
+
+Conditions:
+  HasDomain: !Not [!Equals [!Ref DomainName, ""]]
 
 Resources:
   Table:
@@ -133,19 +146,58 @@ Resources:
       FunctionConfig:
         Comment: Serve index.html for SPA routes
         Runtime: cloudfront-js-2.0
-      FunctionCode: |
-        function handler(event) {
-          var req = event.request;
-          var last = req.uri.substring(req.uri.lastIndexOf('/') + 1);
-          if (last.indexOf('.') === -1) req.uri = '/index.html';
-          return req;
-        }
+      FunctionCode: !Sub
+        - |
+          function tryDecode(v) {
+            try { return decodeURIComponent(v); } catch (e) { return v; }
+          }
+          function handler(event) {
+            var host = '${Hostname}';
+            var req = event.request;
+            // Any other Host (the CloudFront address) gets a permanent redirect to the app's
+            // hostname, keeping the path and every query value. With no domain host is empty.
+            var got = req.headers.host ? req.headers.host.value.toLowerCase() : '';
+            if (host !== '' && got !== host) {
+              var pairs = [];
+              var qs = req.querystring || {};
+              for (var name in qs) {
+                var vals = qs[name].multiValue
+                  ? qs[name].multiValue.map(function (m) { return m.value; })
+                  : [qs[name].value];
+                for (var i = 0; i < vals.length; i++) {
+                  pairs.push(encodeURIComponent(name) + '=' + encodeURIComponent(tryDecode(vals[i])));
+                }
+              }
+              return {
+                statusCode: 301,
+                statusDescription: 'Moved Permanently',
+                headers: { location: { value: 'https://' + host + req.uri + (pairs.length ? '?' + pairs.join('&') : '') } }
+              };
+            }
+            var last = req.uri.substring(req.uri.lastIndexOf('/') + 1);
+            if (last.indexOf('.') === -1) req.uri = '/index.html';
+            return req;
+          }
+        - Hostname: !If [HasDomain, !Ref DomainName, ""]
 
   Distribution:
     Type: AWS::CloudFront::Distribution
+    Metadata:
+      cfn-lint:
+        config:
+          # CertificateArn defaults to "" but is only read under HasDomain;
+          # the linter resolves the default regardless.
+          ignore_checks: [W1030]
     Properties:
       DistributionConfig:
         Enabled: true
+        Aliases: !If [HasDomain, [!Ref DomainName], !Ref AWS::NoValue]
+        ViewerCertificate: !If
+          - HasDomain
+          - AcmCertificateArn: !Ref CertificateArn
+            SslSupportMethod: sni-only
+            MinimumProtocolVersion: TLSv1.2_2021
+          - CloudFrontDefaultCertificate: true
         Comment: !Sub auth-app ${Stage}
         HttpVersion: http2and3
         PriceClass: PriceClass_200
@@ -185,7 +237,10 @@ Resources:
 Outputs:
   BaseUrl:
     Description: The one URL of the site (docs, demo and /api).
-    Value: !Sub "https://${Distribution.DomainName}"
+    Value: !If [HasDomain, !Sub "https://${DomainName}", !Sub "https://${Distribution.DomainName}"]
+  DistributionDomain:
+    Description: The CloudFront name (the CNAME target); always set.
+    Value: !GetAtt Distribution.DomainName
   RawBffUrl:
     Description: Direct Function URL (must answer 401 without CloudFront).
     Value: !GetAtt BffUrl.FunctionUrl

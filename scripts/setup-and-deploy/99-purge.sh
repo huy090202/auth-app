@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# Empty the site bucket, delete stack auth-app-$STAGE and its three SSM parameters,
-# after a typed confirmation.
+# Empty the site bucket, delete stack auth-app-$STAGE and its SSM parameters (session-secret,
+# origin-verify, authgate-client-key, and the custom-domain pair domain and certificate-arn
+# written by 00-domain.sh), after a typed confirmation. An absent parameter is skipped.
 set -euo pipefail
 # shellcheck source=lib.sh
 # shellcheck source-path=SCRIPTDIR
@@ -21,7 +22,7 @@ aws cloudformation delete-stack --region "$REGION" --stack-name "$STACK"
 aws cloudformation wait stack-delete-complete --region "$REGION" --stack-name "$STACK"
 echo "deleted stack $STACK"
 
-for name in session-secret origin-verify authgate-client-key; do
+for name in session-secret origin-verify authgate-client-key domain certificate-arn; do
   if err="$(aws ssm delete-parameter --region "$REGION" --name "$PARAM_PREFIX/$name" 2>&1)"; then
     echo "deleted $PARAM_PREFIX/$name"
   elif [[ "$err" == *ParameterNotFound* ]]; then

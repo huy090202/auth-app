@@ -1,5 +1,6 @@
 ---
 title: What you get
+signUp: true
 ---
 # What you get
 

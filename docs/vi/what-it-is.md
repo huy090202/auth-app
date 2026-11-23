@@ -1,5 +1,6 @@
 ---
 title: AuthGate cho bạn những gì
+signUp: true
 ---
 # AuthGate cho bạn những gì
 

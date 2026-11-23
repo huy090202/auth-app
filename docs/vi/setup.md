@@ -1,13 +1,19 @@
 ---
 title: Lấy credentials
+signUp: true
 ---
 # Lấy credentials
 
 Với AuthGate, backend của bạn là một *client*. Mỗi client có key, user và cấu hình riêng.
 
-## Xin cấp client
+## Tạo client
 
-Client do team vận hành AuthGate của bạn tạo. Gửi cho họ các thông tin sau:
+Bạn tự đăng ký trên AuthGate Portal rồi tự tạo client:
+
+1. Đăng ký tại <https://portal.authgatehq.com/sign-up>. Bạn đặt một mật khẩu.
+2. Xác nhận địa chỉ email qua thư Portal gửi cho bạn. Bước này hỏi lại mật khẩu đó.
+3. Thiết lập PIN hoặc passkey.
+4. Tạo client với các thông tin sau. Key chỉ hiện một lần.
 
 | Field | Bắt buộc | Quy tắc |
 |---|---|---|
@@ -22,8 +28,8 @@ Client do team vận hành AuthGate của bạn tạo. Gửi cho họ các thôn
 Chọn `rpId` cho kỹ. Passkey gắn chặt với nó, nên chuyển sang domain khác là mọi user phải đăng ký
 lại. `rpId` hoặc `origins` không khớp với trang thì các call passkey sẽ fail.
 
-Liệt kê đủ các origin bạn sẽ cần ngay từ đầu, và trao đổi với team vận hành trước khi cần thay đổi.
-Yếu tố của user thuộc về một client, nên chuyển sang client thay thế là mọi user phải đăng ký lại.
+Sau này bạn vẫn sửa được tên, origin, PIN policy và thời gian sống của token ngay trên Portal.
+Riêng `rpId` thì không đổi được. Yếu tố của user thuộc về một client, nên chuyển sang client thay thế là mọi user phải đăng ký lại.
 
 Mỗi môi trường nên có một client riêng. Local, staging và production có origin khác nhau, và tách
 ra thì user với key của chúng không lẫn vào nhau.
@@ -58,17 +64,18 @@ export async function authGate(method: string, path: string, body?: unknown) {
 Thiếu key hoặc sai key thì nhận `401 {"error":"unauthorized"}`, không kèm lý do. Nếu key chắc chắn
 đúng mà thỉnh thoảng vẫn gặp `401` thì có thể do lỗi phía AuthGate, nên thử lại trước khi xin key mới.
 
-## Rotate key
+## Đổi key
 
-Key mới do team vận hành cấp. Key mới dùng được ngay, còn key cũ vẫn chạy thêm 24 giờ để bạn kịp
+Bạn tự đổi key trên trang của client trong Portal, bằng nút "Xoay khóa". Portal sẽ yêu cầu bạn xác
+nhận bằng yếu tố thứ hai. Key mới dùng được ngay, còn key cũ vẫn chạy thêm 24 giờ để bạn kịp
 deploy mà không bị gián đoạn.
 
-Điều đó cũng có nghĩa là chỉ rotate thì không chặn được key đã lộ. Nếu key bị lộ, báo team vận hành
-ngay. Team vận hành có thể:
+Điều đó cũng có nghĩa là chỉ đổi key thì không chặn được key đã lộ. Nếu key bị lộ, hãy đổi key,
+rồi chấm dứt luôn 24 giờ của key cũ ngay trên cùng trang, bằng nút "Thu hồi các khóa cũ". Backend
+của bạn sẽ nhận `401` cho tới khi deploy key mới.
 
-- **Thay key ngay:** cấp key mới rồi chấm dứt luôn 24 giờ của key cũ. Backend của bạn sẽ nhận `401`
-  cho tới khi deploy key mới.
-- **Disable client của bạn:** mọi key của client ngừng hoạt động ngay và nhận `401` giống hệt key sai,
-  cho tới khi team vận hành bật lại client.
+Hoặc tắt client ngay tại đó, bằng nút "Vô hiệu hóa ứng dụng khách". Mọi key của client ngừng hoạt
+động ngay và nhận `401` giống hệt key sai. Muốn dùng lại thì bấm "Bật ứng dụng khách". Client do
+quản trị viên khoá thì vẫn bị khoá cho tới khi team vận hành mở lại.
 
 Dù theo cách nào, token đã cấp vẫn hợp lệ đến khi hết hạn, tối đa 15 phút.

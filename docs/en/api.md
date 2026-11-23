@@ -3,8 +3,8 @@ title: API reference
 ---
 # API reference
 
-These are the calls your backend makes. Creating clients and issuing keys is handled by the
-operator and isn't part of this API. See [Get your credentials](/docs/setup).
+These are the calls your backend makes. You create clients and their keys yourself in the
+Portal; that isn't part of this API. See [Get your credentials](/docs/setup).
 
 ## Conventions
 

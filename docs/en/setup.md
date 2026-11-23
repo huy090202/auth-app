@@ -1,13 +1,19 @@
 ---
 title: Get your credentials
+signUp: true
 ---
 # Get your credentials
 
 Your backend is a *client* of AuthGate. Each client has its own key, users and settings.
 
-## Request a client
+## Create a client
 
-The team that operates your AuthGate creates clients. Send them these values:
+Sign up on the AuthGate Portal, then create the client yourself:
+
+1. Sign up at <https://portal.authgatehq.com/sign-up>. You set a password.
+2. Confirm your email address from the mail the Portal sends you. It asks for that password again.
+3. Enrol a PIN or a passkey.
+4. Create a client with these values. The key is shown once.
 
 | Field | Required | Rules |
 |---|---|---|
@@ -22,8 +28,8 @@ The team that operates your AuthGate creates clients. Send them these values:
 Choose `rpId` with care. Passkeys are bound to it, so moving to another domain means every
 user enrolls again. If `rpId` or `origins` don't match the page, passkey calls fail.
 
-List every origin you will need up front, and talk to the operator before you need a change.
-A user's factors belong to one client, so moving to a replacement client means every user enrolls
+You can edit a client's name, origins, PIN policy and token lifetime later in the Portal.
+`rpId` cannot change. A user's factors belong to one client, so moving to a replacement client means every user enrolls
 again.
 
 Use one client per environment. Local, staging and production have different origins, and
@@ -63,15 +69,16 @@ asking for a new key.
 
 ## Rotate the key
 
-The operator issues new keys. The new key works at once, and the previous one keeps working
-for 24 hours so you can redeploy without downtime.
+You rotate the key yourself on the client's page in the Portal. The Portal asks you to confirm
+with your second factor. The new key works at once, and the previous one keeps working for 24
+hours so you can redeploy without downtime.
 
-That also means rotating alone doesn't stop a leaked key. If your key leaks, tell the operator
-immediately. The operator can:
+That also means rotating alone doesn't stop a leaked key. If your key leaks, rotate, then end the
+previous key's 24 hours at once on the same page ("Revoke previous keys"). Your backend gets `401`
+until you deploy the new key.
 
-- **Replace the key now:** issue a new key, then end the previous key's 24 hours at once. Your
-  backend gets `401` until you deploy the new key.
-- **Disable your client:** all of its keys stop at once and get the same `401` as a wrong key, until
-  the operator enables the client again.
+Or disable the client there. All of its keys stop at once and get the same `401` as a wrong key,
+until you enable it again. A client an administrator disabled stays disabled until the operator
+enables it.
 
 Either way, tokens already issued stay valid until they expire, 15 minutes at most.

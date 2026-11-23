@@ -29,3 +29,6 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm run check
+        env:
+          # The shellcheck npm wrapper asks GitHub's API for its latest release; a token lifts the per-IP limit.
+          GITHUB_TOKEN: ${{ github.token }}

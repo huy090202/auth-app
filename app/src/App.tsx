@@ -1,9 +1,10 @@
-import { ActionIcon, Burger, Drawer, SegmentedControl, useComputedColorScheme, useMantineColorScheme } from '@mantine/core';
+import { ActionIcon, Burger, Button, Drawer, SegmentedControl, useComputedColorScheme, useMantineColorScheme } from '@mantine/core';
 import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router';
 import { Backdrop, Brand } from './brand';
 import { DocsNav } from './docs/DocsLayout';
 import { useLang, type Lang } from './lib/i18n';
+import { portalSignUpUrl } from './lib/links';
 import { AppRoutes } from './routes';
 import { TraceDrawer } from './trace/TraceDrawer';
 
@@ -47,6 +48,7 @@ export function App() {
           <Link to="/app/login" aria-current={pathname.startsWith('/app') ? 'page' : undefined}>Demo</Link>
         </nav>
         <div className="header-tools">
+          <Button component="a" href={portalSignUpUrl} size="xs" radius="md" visibleFrom="sm">{lang === 'vi' ? 'Đăng ký' : 'Sign up'}</Button>
           <SegmentedControl size="xs" radius="md" value={lang} onChange={(v) => setLang(v as Lang)} aria-label="Docs language"
             data={[{ label: 'EN', value: 'en' }, { label: 'VI', value: 'vi' }]} />
           <SchemeToggle />
