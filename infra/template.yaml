@@ -22,6 +22,7 @@ Parameters:
   DomainName:
     Type: String
     Default: ""
+    AllowedPattern: '^$|^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+$'
     Description: Optional custom domain of the site (set by the deploy script from SSM). Needs CertificateArn.
   CertificateArn:
     Type: String

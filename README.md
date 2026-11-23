@@ -54,8 +54,9 @@ Deploy needs the AWS CLI, SAM CLI, `openssl`, `curl` and `jq`, besides Node and 
 Deploy is two passes. On the first pass `/auth-app/stg/authgate-client-key` does not
 exist in SSM yet, so bff's config load throws at cold start and every `/api` call fails
 (502), `/api/health` included, until the second pass. `02-register-client.sh stg` writes
-that key and prints the client id as `AUTHGATE_CLIENT_ID=...`; export it for step 6. `03-deploy.sh` and `02-register-client.sh` need
-`AUTHGATE_BASE_URL`; the register script also needs `AUTHGATE_ADMIN_KEY`.
+that key and prints the client id as `AUTHGATE_CLIENT_ID=...`; export it for step 6. `02-register-client.sh` needs
+`AUTHGATE_BASE_URL` and `AUTHGATE_ADMIN_KEY`; `03-deploy.sh` needs `AUTHGATE_BASE_URL` too, except
+with a domain configured, where it defaults to `https://api.<domain>`.
 To serve on a custom domain see [Custom domain](#custom-domain).
 
 ## Custom domain
@@ -75,8 +76,13 @@ shared certificate are in auth-gate's `docs/reference/custom-domain.md` and
   `/credo/auth-gate/<stage>/certificate-arn` into `/auth-app/<stage>/certificate-arn` and records
   `/auth-app/<stage>/domain`. A deploy stops before `sam` unless the certificate is `ISSUED`.
 - **With no `domain` parameter nothing changes:** the deploy uses the CloudFront address.
-- **Forward-only per stack.** Once a stack was deployed with a domain, deleting the SSM parameters
-  does not move it back, because `sam deploy` reuses the previous values.
+- **Forward-only per stack, with this template.** Once a stack was deployed with a domain,
+  deleting the SSM parameters does not move it back, because `sam deploy` reuses the previous
+  values.
+- **Deploy only from this worktree until this branch is merged, and merge right after the
+  rollout.** `main`'s template has no domain parameters, so a deploy from `main` drops the alias,
+  the certificate and the redirect while the stack keeps the new client (its rpId is the apex, so
+  passkeys then fail on the CloudFront host too).
 - **The old address redirects.** Any other `Host` than the apex gets `301` to
   `https://authgatehq.com<path and query>` on the site. `/api/*` is never redirected.
 - **Cost: demo users enrol again.** AuthGate refuses an rpId change, so auth-app gets a new client
@@ -85,8 +91,9 @@ shared certificate are in auth-gate's `docs/reference/custom-domain.md` and
 
 ### Rollout (stg)
 
-Run it once, from this worktree, after auth-gate's rollout has reached its step 4 (certificate
+Run it once, from this worktree, once auth-gate's custom-domain rollout is done, through its merge (its steps 1 to 7: certificate
 `ISSUED`, AuthGate live on `api.authgatehq.com`, auth-app already redeployed on that base URL).
+Merge this branch right after the rollout; until it is on `main`, deploy only from this worktree.
 Admin steps use the admin profile `default`; the rest use the scripts' own defaults
 (`auth-app-deployer`, `ap-southeast-1`, stage `stg`), so set none of them. No secret goes on a
 command line. The apex record goes in before the deploy, so the name already resolves when the
@@ -136,11 +143,11 @@ for i in $(seq 10); do getent ahostsv4 authgatehq.com >/dev/null && printf 'ok '
 ```
 
 Expect `ok ok ok ok ok ok ok ok ok ok`. If it prints `FAIL`, wait and run the loop again. This
-proves DNS only: until the deploy in step 4 attaches the alias, the apex answers 403, so do not
-curl or smoke it yet.
+proves DNS only: until the deploy in step 4 attaches the alias, HTTPS to the apex fails the TLS name
+check (CloudFront presents a `*.cloudfront.net` certificate), so do not curl or smoke it yet.
 
 **4. Build and deploy on the new name.** The base URL defaults to `https://api.authgatehq.com`.
-`AUTHGATE_CLIENT_ID` stays unset, so the stack keeps the old client id for now. From here the
+`AUTHGATE_CLIENT_ID` stays unset: the script says the stack keeps its previous client id. From here the
 demo's sign-in does not work until step 6.
 
 ```bash
@@ -229,7 +236,15 @@ curl -sS -o /dev/null -w '%{http_code} %{redirect_url}\n' 'https://d3d49hg6rb8yl
 
 Expect `301 https://authgatehq.com/docs/step-up?a=1&a=2&q=a%20b`.
 
-If a line in step 5 or 6 fails, resume from that line; do not rerun the whole block.
+If step 5 or 6 fails:
+
+- Rerun step 5 only if it failed before printing `registered ...`. A successful step 5 must not be
+  repeated.
+- Step 6 is always safe to rerun.
+- If the key was registered but could not be written to SSM, the script prints `error: registered
+  client <id> but could not write /auth-app/stg/authgate-client-key.` and says the key is not
+  recoverable. Rotate the new client's key in the Console, then write the returned key to
+  `/auth-app/stg/authgate-client-key` (SecureString, overwrite).
 
 ## What to copy
 

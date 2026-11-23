@@ -22,6 +22,7 @@ esac
 case "$args" in
   *" ssm get-parameter "*"/credo/auth-gate/t/certificate-arn "*)
     [ "${SCENARIO:-}" = missing ] && { echo "An error occurred (ParameterNotFound)" >&2; exit 254; }
+    [ "${SCENARIO:-}" = denied ] && { echo "An error occurred (AccessDeniedException) when calling the GetParameter operation: not allowed" >&2; exit 254; }
     echo arn:aws:acm:us-east-1:111122223333:certificate/abc ;;
   *" ssm put-parameter --cli-input-json file://"*)
     f="${args##*file://}"; f="${f%% *}"
@@ -52,5 +53,22 @@ SCENARIO=missing bash "$root/scripts/setup-and-deploy/00-domain.sh" example.com 
 if [ "$rc" -ne 0 ] && ! grep -q put-parameter "$LOG" && grep -q 00-cert.sh "$tmp/out"; then
   ok "missing auth-gate certificate parameter: dies with a clear message, writes nothing"
 else nok "missing parameter not handled (rc=$rc)"; cat "$LOG" "$tmp/out"; fi
+
+for bad in https://x.com "a b.com"; do
+  : >"$LOG"
+  rc=0
+  SCENARIO=ok bash "$root/scripts/setup-and-deploy/00-domain.sh" "$bad" >"$tmp/out" 2>&1 || rc=$?
+  if [ "$rc" -ne 0 ] && [ ! -s "$LOG" ] && grep -q "not a valid domain" "$tmp/out"; then
+    ok "invalid domain '$bad': dies before any AWS call"
+  else nok "invalid domain '$bad' accepted (rc=$rc)"; cat "$LOG" "$tmp/out"; fi
+done
+
+: >"$LOG"
+rc=0
+SCENARIO=denied bash "$root/scripts/setup-and-deploy/00-domain.sh" example.com >"$tmp/out" 2>&1 || rc=$?
+if [ "$rc" -ne 0 ] && ! grep -q put-parameter "$LOG" && grep -q AccessDeniedException "$tmp/out" \
+  && ! grep -q 00-cert.sh "$tmp/out"; then
+  ok "AccessDenied on the certificate parameter: prints the real error, not the 00-cert.sh advice"
+else nok "AccessDenied not reported (rc=$rc)"; cat "$LOG" "$tmp/out"; fi
 
 exit "$fail"

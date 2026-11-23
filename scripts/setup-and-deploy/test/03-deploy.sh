@@ -30,6 +30,10 @@ case "$args" in
       *"/auth-app/t/certificate-arn "*) echo arn:aws:acm:us-east-1:111122223333:certificate/abc ;;
       *) echo "stub: unexpected parameter: $args" >&2; exit 255 ;;
     esac ;;
+  *" cloudformation describe-stacks "*)
+    [ "${STACKSTATE:-new}" = new ] && [ ! -e "$SAM_LOG.deployed" ] && { echo "An error occurred (ValidationError): Stack does not exist" >&2; exit 254; }
+    echo x ;;
+  *" s3 sync "*|*" cloudfront create-invalidation "*) ;;
   *" acm describe-certificate "*)
     [ "$SCENARIO" = pending ] && echo PENDING_VALIDATION || echo ISSUED ;;
   *) echo "stub: unexpected call: $args" >&2; exit 255 ;;
@@ -38,7 +42,8 @@ STUB
 cat >"$tmp/bin/sam" <<'STUB'
 #!/usr/bin/env bash
 echo "$*" >>"$SAM_LOG"
-exit 1
+touch "$SAM_LOG.deployed"
+exit "${SAM_RC:-1}"
 STUB
 chmod +x "$tmp/bin/aws" "$tmp/bin/sam"
 export PATH="$tmp/bin:$PATH"
@@ -53,6 +58,7 @@ run() {
   shift
   export SCENARIO="$sc" SAM_LOG="$tmp/sam.log"
   : >"$SAM_LOG"
+  rm -f "$SAM_LOG.deployed"
   rc=0
   env -u AUTHGATE_BASE_URL -u AUTHGATE_CLIENT_ID "$@" \
     bash "$tmp/tree/scripts/setup-and-deploy/03-deploy.sh" >"$tmp/out" 2>&1 || rc=$?
@@ -86,5 +92,21 @@ run pending
 if [ "$rc" -ne 0 ] && [ ! -s "$SAM_LOG" ] && grep -q PENDING_VALIDATION "$tmp/out"; then
   ok "domain with a pending certificate: dies before sam deploy"
 else nok "pending certificate did not stop the deploy (rc=$rc)"; cat "$SAM_LOG" "$tmp/out"; fi
+
+# The closing message depends on whether the stack exists (sam succeeds here).
+run absent AUTHGATE_BASE_URL=https://api.example.test SAM_RC=0 STACKSTATE=new
+if [ "$rc" -eq 0 ] && grep -q "/api returns 502" "$tmp/out" && ! grep -q "keeps its previous" "$tmp/out"; then
+  ok "new stack, no client id: the 502 message"
+else nok "new stack message wrong (rc=$rc)"; cat "$tmp/out"; fi
+
+run absent AUTHGATE_BASE_URL=https://api.example.test SAM_RC=0 STACKSTATE=exists
+if [ "$rc" -eq 0 ] && grep -q "keeps its previous client id" "$tmp/out" && ! grep -q "502" "$tmp/out"; then
+  ok "existing stack, no client id: it keeps its previous client id"
+else nok "existing stack message wrong (rc=$rc)"; cat "$tmp/out"; fi
+
+run absent AUTHGATE_BASE_URL=https://api.example.test SAM_RC=0 STACKSTATE=exists AUTHGATE_CLIENT_ID=c1
+if [ "$rc" -eq 0 ] && ! grep -q -e "502" -e "previous client id" "$tmp/out"; then
+  ok "client id given: no client id message"
+else nok "client id given but a message printed (rc=$rc)"; cat "$tmp/out"; fi
 
 exit "$fail"

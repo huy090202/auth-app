@@ -25,6 +25,14 @@ output() {
     --query "Stacks[0].Outputs[?OutputKey=='$1'].OutputValue" --output text
 }
 
+# With no client id given, tell a new stack (no client yet) from an existing one (it keeps the
+# previous AuthGateClientId): describe-stacks fails when the stack does not exist.
+stack_exists=0
+if [[ -z "$client_id" ]] && aws cloudformation describe-stacks --region "$REGION" --stack-name "$STACK" \
+  --query "Stacks[0].StackName" --output text >/dev/null 2>&1; then
+  stack_exists=1
+fi
+
 # sam rejects empty overrides ("AuthGateClientId="); the template defaults it to "".
 params=("Stage=$STAGE" "AuthGateBaseUrl=${AUTHGATE_BASE_URL%/}" "Trace=${TRACE:-1}")
 [[ -z "$client_id" ]] || params+=("AuthGateClientId=$client_id")
@@ -44,5 +52,9 @@ echo "invalidated $dist"
 echo "BaseUrl: $(output BaseUrl)"
 echo "RawBffUrl: $(output RawBffUrl)"
 if [[ -z "$client_id" ]]; then
-  echo "AUTHGATE_CLIENT_ID is empty: /api returns 502 until the second pass. Now run 02-register-client.sh stg and deploy again"
+  if [[ "$stack_exists" == 1 ]]; then
+    echo "AUTHGATE_CLIENT_ID is unset: the stack keeps its previous client id"
+  else
+    echo "AUTHGATE_CLIENT_ID is empty: /api returns 502 until the second pass. Now run 02-register-client.sh stg and deploy again"
+  fi
 fi

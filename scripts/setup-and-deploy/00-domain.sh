@@ -14,12 +14,22 @@ set -euo pipefail
 
 [ "$#" -eq 1 ] && [ -n "$1" ] || die "usage: 00-domain.sh DOMAIN"
 domain="$(tr '[:upper:]' '[:lower:]' <<<"$1")"
+[[ "$domain" =~ ^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+$ ]] \
+  || die "'$1' is not a valid domain name (a bare hostname such as example.com: no scheme, path, port or spaces)"
 profile="${ADMIN_PROFILE:-default}"
 
 src="/credo/auth-gate/$STAGE/certificate-arn"
 rc=0
+errf="$(mktemp)"
 arn="$(aws --profile "$profile" --region "$REGION" ssm get-parameter --name "$src" \
-  --query Parameter.Value --output text 2>/dev/null)" || rc=$?
+  --query Parameter.Value --output text 2>"$errf")" || rc=$?
+if [ "$rc" -ne 0 ] && ! grep -q ParameterNotFound "$errf"; then
+  echo "error: reading $src failed:" >&2
+  cat "$errf" >&2
+  rm -f "$errf"
+  exit 1
+fi
+rm -f "$errf"
 { [ "$rc" -eq 0 ] && [ -n "$arn" ] && [ "$arn" != None ]; } \
   || die "cannot read $src: run auth-gate's scripts/setup-and-deploy/00-cert.sh $domain first, with the same STAGE"
 

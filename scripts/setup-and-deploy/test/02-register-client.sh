@@ -107,6 +107,9 @@ if [ "$rc" -eq 0 ] && [ "$(posts)" -eq 1 ] && [ "$(puts)" -eq 1 ] \
   && grep -q "AUTHGATE_CLIENT_ID=new-client-id" "$tmp/out"; then
   ok "--replace with the exact answer: one POST (right rpId, origin), one overwrite, old id printed"
 else nok "exact answer (rc=$rc)"; cat "$CALLS" "$tmp/out"; fi
+if grep '^curl ' "$CALLS" | grep -q -e '--connect-timeout 5 --max-time 30'; then
+  ok "the POST has a connect and a total timeout"
+else nok "the POST has no timeouts"; cat "$CALLS"; fi
 if ! grep -q -e "$ADMIN_SECRET" -e "$CLIENT_SECRET" "$CALLS" "$tmp/out"; then
   ok "neither key appears in any argv or in the output"
 else nok "a secret leaked"; cat "$CALLS"; fi

@@ -86,7 +86,7 @@ trap 'rm -rf "$tmpdir"' EXIT
 printf 'x-internal-access-key: %s\n' "$AUTHGATE_ADMIN_KEY" >"$tmpdir/headers"
 jq -n --arg name "$name" --arg rp "$rp_id" --arg origin "$origin" \
   '{name: $name, rpId: $rp, origins: [$origin]}' >"$tmpdir/body"
-status="$(curl -sS -o "$tmpdir/resp" -w '%{http_code}' -X POST "$base/api/clients" \
+status="$(curl -sS --connect-timeout 5 --max-time 30 -o "$tmpdir/resp" -w '%{http_code}' -X POST "$base/api/clients" \
   -H @"$tmpdir/headers" -H 'content-type: application/json' \
   --data-binary @"$tmpdir/body")" || die "POST $base/api/clients: network error"
 if [[ "$status" != 201 ]]; then
