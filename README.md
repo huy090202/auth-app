@@ -250,6 +250,61 @@ If step 5 or 6 fails:
   recoverable. Rotate the new client's key in the Console, then write the returned key to
   `/auth-app/stg/authgate-client-key` (SecureString, overwrite).
 
+## Search engines
+
+Google indexes the prerendered pages only: the landing (`/`, `/vi/`) and the docs
+(`/docs/<slug>`, `/vi/docs/<slug>`), each with a canonical URL and `hreflang` `en`, `vi` and
+`x-default`. The demo under `/app/...` is not indexed: its shell `index.html` carries
+`<meta name="robots" content="noindex">`. `sitemap.xml` and `robots.txt` are built into `app/dist`.
+
+CloudFront serves the prerendered pages through the `SpaRewrite` function. `03-deploy.sh` passes it
+the slug list as the `DocSlugs` parameter, from `docs/en/*.md`, and stops if `docs/vi` has other
+files. A slug that is not in the list, in either language, gets the SPA shell, which redirects to
+that language's `what-it-is`. Add a docs page in both languages, then rebuild and deploy.
+
+### Search Console (once)
+
+1. Open Google Search Console, Add property, Domain, `authgatehq.com`.
+2. Copy the TXT value it shows.
+3. At Cloudflare, `authgatehq.com`, DNS, Records, Add record: Type `TXT`, Name `@`, Content the
+   value, Save. (TXT records are never proxied, so this is DNS only.)
+4. Back in Search Console, Verify.
+5. Sitemaps, submit `https://authgatehq.com/sitemap.xml`.
+6. URL inspection on `https://authgatehq.com/` and `https://authgatehq.com/vi/docs/step-up`,
+   Request indexing.
+
+### Checks after a deploy
+
+```bash
+curl -s https://authgatehq.com/vi/docs/step-up | grep -E '<html lang|canonical|hreflang'
+```
+
+Expect `<html lang="vi">`, a canonical of `https://authgatehq.com/vi/docs/step-up` and three
+`hreflang` links.
+
+```bash
+curl -s https://authgatehq.com/robots.txt
+```
+
+Expect `Allow: /`, `Disallow: /app/` and a `Sitemap:` line.
+
+```bash
+curl -sI https://authgatehq.com/sitemap.xml
+```
+
+Expect `HTTP/2 200` and an XML content type.
+
+### Rollout
+
+Deploy only from this worktree until the branch is merged: `main`'s template has no `DocSlugs`,
+so a deploy from `main` sends every docs page back to the shell.
+
+1. Deploy from the branch: `scripts/setup-and-deploy/02-build.sh`, `03-deploy.sh`, then
+   `04-smoke.sh`.
+2. Run the curl checks above, plus `curl -sI https://authgatehq.com/vi` (expect `200`).
+3. Do the Search Console steps.
+4. Merge the branch.
+
 ## What to copy
 
 If you integrate auth-gate yourself, start from these three files:

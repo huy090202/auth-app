@@ -1,6 +1,6 @@
 // Why: the SpaRewrite CloudFront Function is the only thing that sends the old CloudFront address to the
 // app's hostname, and it lives as a YAML literal inside each template, where nothing else runs it. This test
-// pulls that literal out, fills the one !Sub variable the way CloudFormation does, and runs `handler`.
+// pulls that literal out, fills the !Sub variables (Hostname, DocSlugs) the way CloudFormation does, and runs `handler`.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
@@ -26,12 +26,13 @@ function extractFunctionCode(file) {
   }
   const js = body.join('\n');
   assert.ok(js.includes('${Hostname}'), `${file}: the Hostname placeholder`);
-  assert.equal(js.replaceAll('${Hostname}', '').includes('${'), false, `${file}: no other \${ in the code`);
+  assert.ok(js.includes('${DocSlugs}'), `${file}: the DocSlugs placeholder`);
+  assert.equal(js.replaceAll('${Hostname}', '').replaceAll('${DocSlugs}', '').includes('${'), false, `${file}: no other \${ in the code`);
   return js;
 }
 
-function handlerFor(file, hostname) {
-  const js = extractFunctionCode(file).replaceAll('${Hostname}', hostname);
+function handlerFor(file, hostname, slugs = '') {
+  const js = extractFunctionCode(file).replaceAll('${Hostname}', hostname).replaceAll('${DocSlugs}', slugs);
   return new Function(`${js}\nreturn handler;`)();
 }
 
@@ -93,4 +94,36 @@ test('template.yaml: a mixed-case Host is the app host, so no redirect', () => {
   const out = handlerFor('template.yaml', 'authgatehq.com')(event('AuthGateHQ.com', '/docs/step-up'));
   assert.equal(out.statusCode, undefined);
   assert.equal(out.uri, '/index.html');
+});
+
+// The prerendered pages: CloudFront maps a clean URL to the folder's index.html.
+test('template.yaml: prerendered pages map to their own index.html, everything else to the SPA shell', () => {
+  const h = handlerFor('template.yaml', 'authgatehq.com', 'what-it-is,step-up');
+  const uri = (u) => h(event('authgatehq.com', u)).uri;
+  assert.equal(uri('/'), '/landing/index.html');
+  assert.equal(uri('/vi'), '/vi/index.html');
+  assert.equal(uri('/vi/'), '/vi/index.html');
+  assert.equal(uri('/docs/step-up'), '/docs/step-up/index.html');
+  assert.equal(uri('/docs/step-up/'), '/docs/step-up/index.html');
+  assert.equal(uri('/vi/docs/step-up'), '/vi/docs/step-up/index.html');
+  assert.equal(uri('/vi/docs/step-up/'), '/vi/docs/step-up/index.html');
+  assert.equal(uri('/docs/nope'), '/index.html');
+  assert.equal(uri('/vi/docs/nope'), '/index.html');
+  assert.equal(uri('/app/login'), '/index.html');
+  assert.equal(uri('/assets/x.js'), '/assets/x.js');
+  assert.equal(uri('/robots.txt'), '/robots.txt');
+  assert.equal(uri('/sitemap.xml'), '/sitemap.xml');
+});
+
+test('template.yaml: with no slugs, docs paths fall through to the shell; the landing still maps', () => {
+  const h = handlerFor('template.yaml', 'authgatehq.com', '');
+  assert.equal(h(event('authgatehq.com', '/docs/step-up')).uri, '/index.html');
+  assert.equal(h(event('authgatehq.com', '/vi/docs/step-up')).uri, '/index.html');
+  assert.equal(h(event('authgatehq.com', '/vi')).uri, '/vi/index.html');
+});
+
+test('template.yaml: the foreign-host redirect still comes first', () => {
+  const out = handlerFor('template.yaml', 'authgatehq.com', 'step-up')(event('x.cloudfront.net', '/vi'));
+  assert.equal(out.statusCode, 301);
+  assert.equal(out.headers.location.value, 'https://authgatehq.com/vi');
 });

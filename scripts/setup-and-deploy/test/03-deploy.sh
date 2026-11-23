@@ -9,12 +9,13 @@ root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
 tmp="$(mktemp -d)"
 trap 'rm -rf "$tmp"' EXIT
 mkdir -p "$tmp/bin" "$tmp/home" "$tmp/tree/scripts/setup-and-deploy" "$tmp/tree/infra" \
-  "$tmp/tree/bff/dist" "$tmp/tree/app/dist"
+  "$tmp/tree/bff/dist" "$tmp/tree/app/dist" "$tmp/tree/docs/en" "$tmp/tree/docs/vi"
 cp "$root/scripts/setup-and-deploy/lib.sh" "$root/scripts/setup-and-deploy/domain.sh" \
   "$root/scripts/setup-and-deploy/03-deploy.sh" "$tmp/tree/scripts/setup-and-deploy/"
 : >"$tmp/tree/bff/dist/index.mjs"
 : >"$tmp/tree/app/dist/index.html"
 : >"$tmp/tree/infra/template.yaml"
+for l in en vi; do : >"$tmp/tree/docs/$l/step-up.md"; : >"$tmp/tree/docs/$l/api.md"; : >"$tmp/tree/docs/$l/what-it-is.md"; done
 export HOME="$tmp/home" AWS_CONFIG_FILE=/dev/null AWS_SHARED_CREDENTIALS_FILE=/dev/null
 export AWS_PROFILE=stub STAGE=t AWS_REGION=ap-southeast-1
 
@@ -71,6 +72,18 @@ if [ "$(wc -l <"$SAM_LOG")" -eq 1 ] \
   && grep -q -- "AuthGateBaseUrl=https://api.authgatehq.com " "$SAM_LOG"; then
   ok "domain: DomainName, CertificateArn and the default AuthGateBaseUrl are passed"
 else nok "domain: overrides wrong (rc=$rc)"; cat "$SAM_LOG" "$tmp/out"; fi
+
+if grep -q -- "DocSlugs=api,step-up,what-it-is\( \|$\)" "$SAM_LOG"; then
+  ok "DocSlugs: the sorted, comma-joined docs/en basenames are passed"
+else nok "DocSlugs wrong"; cat "$SAM_LOG"; fi
+
+# A slug missing in one language: every slug needs both, so the deploy dies before sam.
+: >"$tmp/tree/docs/en/extra.md"
+run issued
+if [ "$rc" -ne 0 ] && [ ! -s "$SAM_LOG" ] && grep -q docs/vi "$tmp/out"; then
+  ok "DocSlugs: docs/en and docs/vi differing stops the deploy"
+else nok "docs mismatch did not stop the deploy (rc=$rc)"; cat "$SAM_LOG" "$tmp/out"; fi
+rm -f "$tmp/tree/docs/en/extra.md"
 
 run issued AUTHGATE_BASE_URL=https://explicit.example/
 if grep -q -- "AuthGateBaseUrl=https://explicit.example " "$SAM_LOG" && grep -q -- "DomainName=authgatehq.com" "$SAM_LOG"; then
