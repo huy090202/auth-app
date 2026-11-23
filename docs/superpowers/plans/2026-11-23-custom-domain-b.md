@@ -180,3 +180,30 @@ Read them at `/home/work/auth-gate/main`.
 - [ ] **Step 3: Gate and commit.** `pnpm run check`, then `git commit -m "docs: auth-app on authgatehq.com, its rollout, and a pinned shellcheck"`.
 
 After the merge, auth-gate's README links "Docs and live demo" to `https://authgatehq.com` and drops the CloudFront host. That is a one-line change in that repository, outside this plan.
+
+### Task 5: A "Sign up" button to the Portal, and self-service credentials in the docs
+
+Added on 2026-11-23 at the owner's request. Decided by the owner:
+- the button leads to the Portal's sign-up page;
+- it sits in the header and at the top of the docs' first page.
+
+This is a link, not P4's "Get a key" page.
+
+**Files:**
+- Create: `app/src/lib/links.ts`, exporting `portalSignUpUrl`. Its value is `${import.meta.env.VITE_PORTAL_URL ?? 'https://portal.authgatehq.com'}/sign-up` with any trailing slash of the base removed.
+- Modify: `app/src/App.tsx`. In `.header-tools`, before the language control, add a Mantine `Button` `component="a"` `href={portalSignUpUrl}` `size="xs"` `radius="md"`, labelled "Sign up" / "Đăng ký". It shows on every page and stays visible at phone width.
+- Modify: `app/src/docs/loader.ts`, `app/src/docs/DocsPage.tsx`. A new optional frontmatter key, `signUp: true`. `DocsPage` then renders, above the page body, a filled Button to `portalSignUpUrl` labelled "Sign up on the Portal" / "Đăng ký trên Portal". The existing "Try it" button stays as it is. Extend `parseFrontmatter`'s doc comment and its test.
+- Modify: `docs/en/what-it-is.md`, `docs/vi/what-it-is.md` (frontmatter `signUp: true`).
+- Modify: `docs/en/setup.md`, `docs/vi/setup.md`. Replace "Request a client" and "The team that operates your AuthGate creates clients. Send them these values" with self-service:
+  1. sign up on the Portal at <https://portal.authgatehq.com/sign-up>;
+  2. confirm the email address;
+  3. enrol a PIN or passkey;
+  4. create a client with these values. The key is shown once.
+
+  Keep the field table. Replace "talk to the operator before you need a change" with: origins can be edited later in the Portal; `rpId` cannot change. Use natural Vietnamese for the VI page, not a word-for-word translation. Add `signUp: true` to both setup pages.
+- Test: `app/src/docs/loader.test.ts` (the `signUp` key); `app/src/lib/links.test.ts` (default URL `https://portal.authgatehq.com/sign-up`; a base with a trailing slash gives no double slash).
+
+- [ ] **Step 1:** Write the failing tests named above. Run `pnpm --filter app test`. Expected: FAIL.
+- [ ] **Step 2:** Implement. Run the tests, then `pnpm run check`. Expected: PASS.
+- [ ] **Step 3:** Run `pnpm --filter app dev` and open `/docs/what-it-is` and `/docs/setup` at desktop and at 375px width, in EN and VI. The header button and the page button show and point at the Portal. Stop the dev server.
+- [ ] **Step 4: Commit.** `git commit -m "feat(app): a sign-up button to the Portal, and self-service credentials in the docs"`.
