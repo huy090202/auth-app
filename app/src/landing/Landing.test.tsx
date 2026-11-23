@@ -28,6 +28,7 @@ describe('Landing', () => {
     const html = render('/vi/');
     expect(html).toContain(landingStrings.vi.headline);
     expect(html).toContain('href="/vi/docs/what-it-is"');
+    expect(html).toContain(portalSignUpUrl);
   });
   it('keeps the descriptions within 160 characters', () => {
     expect(landingStrings.en.description.length).toBeLessThanOrEqual(160);

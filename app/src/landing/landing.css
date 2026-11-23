@@ -5,7 +5,7 @@
 .landing .lead { font-size: 1.15rem; color: var(--mantine-color-dimmed); margin: 0 0 28px; max-width: 34em; }
 .landing .ctas { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
 .landing .ctas.center { justify-content: center; }
-.landing .ctas .more { color: var(--accent-text); font-weight: 600; text-decoration: none; margin-left: 6px; }
+.landing .ctas .more { color: var(--accent-text); font-weight: 600; text-decoration: none; }
 .landing .ctas .more:hover { text-decoration: underline; }
 .landing .code { border-radius: 10px; min-width: 0; }
 .landing pre { margin: 0; padding: 20px; font: 0.82rem/1.55 var(--mantine-font-family-monospace); overflow-x: auto; color: var(--code-ink); }
@@ -27,4 +27,5 @@
   .landing .hero { grid-template-columns: 1fr; padding-top: 40px; }
   .landing h1 { font-size: 2.1rem; }
   .landing .cards { grid-template-columns: 1fr; }
+  .landing pre { white-space: pre-wrap; overflow-wrap: anywhere; }
 }

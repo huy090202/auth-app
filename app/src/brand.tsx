@@ -18,7 +18,7 @@ export function Brand() {
   const [lang] = useLang();
   const onLanding = localePath('en', useLocation().pathname) === '/';
   return (
-    <Link to={localePath(lang, '/')} className="brand" aria-label="AuthGate, home">
+    <Link to={localePath(lang, '/')} className="brand" aria-label={`${onLanding ? 'AuthGate' : 'AuthGate Docs'}, ${lang === 'vi' ? 'trang chủ' : 'home'}`}>
       <LogoMark />
       <span className="word">AuthGate{!onLanding && <span>Docs</span>}</span>
     </Link>
