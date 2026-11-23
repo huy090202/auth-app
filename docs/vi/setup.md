@@ -66,15 +66,16 @@ Thiếu key hoặc sai key thì nhận `401 {"error":"unauthorized"}`, không k�
 
 ## Rotate key
 
-Key mới do team vận hành cấp. Key mới dùng được ngay, còn key cũ vẫn chạy thêm 24 giờ để bạn kịp
-deploy mà không bị gián đoạn.
+Bạn tự rotate key trên trang của client trong Portal. Portal sẽ yêu cầu bạn xác nhận bằng yếu tố
+thứ hai. Key mới dùng được ngay, còn key cũ vẫn chạy thêm 24 giờ để bạn kịp deploy mà không bị
+gián đoạn.
 
-Điều đó cũng có nghĩa là chỉ rotate thì không chặn được key đã lộ. Nếu key bị lộ, báo team vận hành
-ngay. Team vận hành có thể:
+Điều đó cũng có nghĩa là chỉ rotate thì không chặn được key đã lộ. Nếu key bị lộ, hãy rotate, rồi
+chấm dứt luôn 24 giờ của key cũ ngay trên cùng trang ("Revoke previous keys"). Backend của bạn sẽ
+nhận `401` cho tới khi deploy key mới.
 
-- **Thay key ngay:** cấp key mới rồi chấm dứt luôn 24 giờ của key cũ. Backend của bạn sẽ nhận `401`
-  cho tới khi deploy key mới.
-- **Disable client của bạn:** mọi key của client ngừng hoạt động ngay và nhận `401` giống hệt key sai,
-  cho tới khi team vận hành bật lại client.
+Hoặc disable client ngay tại đó. Mọi key của client ngừng hoạt động ngay và nhận `401` giống hệt
+key sai, cho tới khi bạn enable lại. Client do quản trị viên disable thì vẫn bị khoá cho tới khi
+team vận hành bật lại.
 
 Dù theo cách nào, token đã cấp vẫn hợp lệ đến khi hết hạn, tối đa 15 phút.
