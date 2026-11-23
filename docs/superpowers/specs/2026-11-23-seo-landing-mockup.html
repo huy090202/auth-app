@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AuthGate · A second factor for any backend</title>
+<style>
+  :root { --bg:#eef4f0; --ink:#12201a; --muted:#4b5d54; --rule:#cfdcd5; --glass:rgba(255,255,255,.72); --accent:#0b7041; --accent-soft:#d1fadf; --leaf1:#a6f0c3; --leaf2:#c7ece0; --leaf3:#d9f3e2; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg:#0b1411; --ink:#e3ece7; --muted:#9db3a8; --rule:#22332c; --glass:rgba(14,26,21,.72); --accent:#36c87a; --accent-soft:#0d2a1e; --leaf1:#0f3a26; --leaf2:#0c2b25; --leaf3:#102a1d; } }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:17px/1.6 system-ui,-apple-system,"Segoe UI",sans-serif; }
+  .backdrop { position:fixed; inset:0; z-index:-1; overflow:hidden; }
+  .backdrop span { position:absolute; border-radius:50%; filter:blur(70px); opacity:.8; }
+  .wrap { max-width:1080px; margin:0 auto; padding:0 20px; }
+  header { display:flex; align-items:center; gap:16px; padding:16px 0; }
+  .brand { display:flex; align-items:center; gap:10px; font-weight:700; font-size:18px; text-decoration:none; color:var(--ink); }
+  nav { display:flex; gap:18px; margin-left:12px; }
+  nav a { color:var(--muted); text-decoration:none; font-size:15px; }
+  .tools { margin-left:auto; display:flex; gap:10px; align-items:center; }
+  .seg { display:flex; border:1px solid var(--rule); border-radius:8px; overflow:hidden; font-size:13px; }
+  .seg span { padding:4px 10px; } .seg .on { background:var(--accent-soft); font-weight:600; }
+  .btn { display:inline-block; padding:12px 22px; border-radius:8px; font-weight:600; text-decoration:none; font-size:16px; }
+  .btn.primary { background:#0b7041; color:#fff; }
+  .btn.secondary { border:1px solid var(--accent); color:var(--accent); }
+  .btn.sm { padding:6px 14px; font-size:14px; }
+  .hero { padding:72px 0 56px; display:grid; grid-template-columns:1.1fr .9fr; gap:40px; align-items:center; }
+  h1 { font-size:46px; line-height:1.12; margin:0 0 18px; letter-spacing:-.02em; }
+  .lead { font-size:19px; color:var(--muted); margin:0 0 28px; max-width:34em; }
+  .ctas { display:flex; gap:12px; flex-wrap:wrap; align-items:center; }
+  .ctas .link { color:var(--accent); font-weight:600; text-decoration:none; margin-left:6px; }
+  .glass { background:var(--glass); border:1px solid var(--rule); border-radius:10px; backdrop-filter:blur(18px) saturate(140%); }
+  pre { margin:0; padding:20px; font:13.5px/1.55 ui-monospace,Menlo,Consolas,monospace; overflow-x:auto; }
+  .c { color:var(--muted); } .k { color:var(--accent); font-weight:600; }
+  section { padding:44px 0; }
+  h2 { font-size:30px; margin:0 0 8px; letter-spacing:-.01em; }
+  .sub { color:var(--muted); margin:0 0 28px; }
+  .steps { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
+  .step { padding:22px; }
+  .num { display:inline-grid; place-items:center; width:30px; height:30px; border-radius:50%; background:var(--accent-soft); color:var(--accent); font-weight:700; margin-bottom:10px; }
+  .step h3, .feat h3 { margin:0 0 6px; font-size:18px; }
+  .step p, .feat p { margin:0; color:var(--muted); font-size:15.5px; }
+  .grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
+  .feat { padding:22px; }
+  .cta { text-align:center; padding:48px 24px; }
+  footer { padding:28px 0 40px; color:var(--muted); font-size:14px; display:flex; gap:18px; flex-wrap:wrap; border-top:1px solid var(--rule); margin-top:24px; }
+  footer a { color:var(--muted); }
+  .note { max-width:1080px; margin:24px auto 0; padding:10px 20px; font-size:13px; color:var(--muted); text-transform:uppercase; letter-spacing:.04em; }
+  @media (max-width: 820px) { .hero { grid-template-columns:1fr; padding-top:40px; } h1 { font-size:34px; } .steps,.grid { grid-template-columns:1fr; } nav { display:none; } }
+</style>
+</head>
+<body>
+<div class="backdrop" aria-hidden="true">
+  <span style="background:var(--leaf1);width:520px;height:420px;left:-120px;top:-80px"></span>
+  <span style="background:var(--leaf2);width:480px;height:420px;right:-120px;top:40px"></span>
+  <span style="background:var(--leaf3);width:520px;height:380px;left:40%;bottom:-160px"></span>
+</div>
+<p class="note">Mockup · landing page at https://authgatehq.com/ (VI at /vi/) · not the final copy</p>
+<div class="wrap">
+  <header>
+    <a class="brand" href="#"><svg width="28" height="28" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#0b7041"/><path d="M9 26V14.5a7 7 0 0 1 14 0V26" fill="none" stroke="#ecfdf3" stroke-width="2.6" stroke-linecap="round"/><path d="M16 24.5c-3.6-2.6-4.4-7-1.4-10.6 .5-.6 .9-1 1.4-1.4 .5 .4 .9 .8 1.4 1.4 3 3.6 2.2 8-1.4 10.6Z" fill="#6ee0a0"/><path d="M16 24.5V16" stroke="#0b7041" stroke-width="1.2" stroke-linecap="round"/></svg>AuthGate</a>
+    <nav><a href="#">Docs</a><a href="#">Demo</a></nav>
+    <div class="tools">
+      <div class="seg"><span class="on">EN</span><span>VI</span></div>
+      <a class="btn primary sm" href="#">Sign up</a>
+    </div>
+  </header>
+
+  <div class="hero">
+    <div>
+      <h1>A second factor for any backend</h1>
+      <p class="lead">Ask for a PIN or a passkey before a sensitive action. Your backend calls AuthGate, the user answers, and you get a short-lived token signed with AWS KMS that you verify yourself.</p>
+      <div class="ctas">
+        <a class="btn primary" href="#">Sign up on the Portal</a>
+        <a class="btn secondary" href="#">Try the demo</a>
+        <a class="link" href="#">Read the docs →</a>
+      </div>
+    </div>
+    <div class="glass"><pre><span class="c"># your backend, before "change email"</span>
+<span class="k">POST</span> /api/challenges
+x-internal-access-key: ag_…
+{"subjectId":"u_42","purpose":"change-email","factor":"pin"}
+
+<span class="c"># the user types the PIN; you relay it</span>
+<span class="k">POST</span> /api/challenges/{id}/verify
+{"pin":"482913"}
+
+<span class="c"># → a token you check against the JWKS</span>
+{"token":"eyJhbGciOiJFUzI1NiIs…","factor":"pin"}</pre></div>
+  </div>
+
+  <section>
+    <h2>How a step-up works</h2>
+    <p class="sub">Three calls. The browser only ever talks to your backend.</p>
+    <div class="steps">
+      <div class="step glass"><span class="num">1</span><h3>Open a challenge</h3><p>Your backend names the user, the action it is about to allow, and the factor. For a passkey, AuthGate returns the WebAuthn options.</p></div>
+      <div class="step glass"><span class="num">2</span><h3>The user answers</h3><p>Your page collects the PIN or runs the passkey ceremony, and your backend passes the answer on.</p></div>
+      <div class="step glass"><span class="num">3</span><h3>Check the token</h3><p>Verify the signature against the public keys, then <code>aud</code>, <code>exp</code> and <code>purpose</code>. A token for one action never unlocks another.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>What you don't have to build</h2>
+    <p class="sub">The parts of 2FA that are easy to get wrong.</p>
+    <div class="grid">
+      <div class="feat glass"><h3>PINs</h3><p>Hashed with argon2id, a length policy, trivial PINs refused, lockout after repeated failures.</p></div>
+      <div class="feat glass"><h3>Passkeys</h3><p>WebAuthn options and verification, checked against the domain and origins you registered.</p></div>
+      <div class="feat glass"><h3>Signed tokens</h3><p>ES256, signed in AWS KMS, 5 minutes by default. Verify offline with the JWKS.</p></div>
+      <div class="feat glass"><h3>Keys and limits</h3><p>Rotate a client key with a 24-hour grace, end it early, and a rate limit per client.</p></div>
+      <div class="feat glass"><h3>Self-service</h3><p>Sign up, confirm your email, add a second factor, and create clients on the Portal.</p></div>
+      <div class="feat glass"><h3>Serverless</h3><p>Go on AWS Lambda behind CloudFront, DynamoDB, KMS. No servers to run.</p></div>
+    </div>
+  </section>
+
+  <section class="cta glass" style="margin-top:12px">
+    <h2>Try it in five minutes</h2>
+    <p class="sub">Register a demo account, set a PIN, and watch every call the demo makes.</p>
+    <div class="ctas" style="justify-content:center">
+      <a class="btn primary" href="#">Try the demo</a>
+      <a class="btn secondary" href="#">Sign up on the Portal</a>
+    </div>
+  </section>
+
+  <footer>
+    <span>AuthGate</span><a href="#">Docs</a><a href="#">Demo</a><a href="#">Portal</a><a href="#">Source on GitHub</a><a href="mailto:support@authgatehq.com">support@authgatehq.com</a>
+  </footer>
+</div>
+</body>
+</html>
