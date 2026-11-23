@@ -1,5 +1,5 @@
 import { Marked, type Tokens } from 'marked';
-import type { Lang } from '../lib/i18n';
+import { localePath, type Lang } from '../lib/i18n';
 import { highlight } from './highlight';
 
 export type TocItem = { id: string; text: string; depth: 2 | 3 };
@@ -40,11 +40,18 @@ const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replac
 const langLabel: Record<string, string> = { ts: 'TypeScript', bash: 'Bash', json: 'JSON', text: 'Diagram' };
 
 /** Markdown to HTML plus a table of contents from its h2/h3. */
-export function renderDoc(body: string): { html: string; toc: TocItem[] } {
+export function renderDoc(body: string, lang: Lang = 'en'): { html: string; toc: TocItem[] } {
   const toc: TocItem[] = [];
   const seen = new Map<string, number>();
   const md = new Marked({ gfm: true, async: false });
   md.use({
+    // The Markdown says /docs/...; the VI pages link to their own /vi/docs/... twins.
+    walkTokens(t) {
+      if (lang === 'vi' && t.type === 'link') {
+        const l = t as Tokens.Link;
+        if (/^\/docs(\/|$|[?#])/.test(l.href)) l.href = localePath('vi', l.href);
+      }
+    },
     renderer: {
       heading(this: { parser: { parseInline(t: Tokens.Generic[]): string } }, { tokens, depth, text }: Tokens.Heading) {
         const inner = this.parser.parseInline(tokens);
@@ -69,14 +76,14 @@ export function renderDoc(body: string): { html: string; toc: TocItem[] } {
 }
 
 // docs/ also holds infra/ and superpowers/: glob only en/ and vi/ so they stay out of the bundle.
-const files = import.meta.glob('../../../docs/{en,vi}/*.md', { query: '?raw', import: 'default', eager: true }) as Record<string, string>;
+export const rawDocs = import.meta.glob('../../../docs/{en,vi}/*.md', { query: '?raw', import: 'default', eager: true }) as Record<string, string>;
 
 function load(lang: Lang): DocPage[] {
   return slugs.flatMap((slug) => {
-    const raw = files[`../../../docs/${lang}/${slug}.md`];
+    const raw = rawDocs[`../../../docs/${lang}/${slug}.md`];
     if (raw === undefined) return [];
     const { title, tryIt, signUp, body } = parseFrontmatter(raw);
-    const { html, toc } = renderDoc(body);
+    const { html, toc } = renderDoc(body, lang);
     return [{ slug, lang, title, ...(tryIt ? { tryIt } : {}), ...(signUp ? { signUp } : {}), html, toc }];
   });
 }

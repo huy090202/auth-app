@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import { Link, useParams } from 'react-router';
-import { useLang, type Lang } from '../lib/i18n';
+import { localePath, useLang, type Lang } from '../lib/i18n';
 import { pages, type TocItem } from './loader';
 import { activeIndex, landingY } from './scrollspy';
 
@@ -22,7 +22,7 @@ export function DocsNav() {
           {g.slugs.map((slug) => {
             const p = pages[lang].find((x) => x.slug === slug);
             return p ? (
-              <Link key={slug} to={`/docs/${slug}`} className="nav-link" aria-current={slug === page ? 'page' : undefined}>
+              <Link key={slug} to={localePath(lang, `/docs/${slug}`)} className="nav-link" aria-current={slug === page ? 'page' : undefined}>
                 {p.title}
               </Link>
             ) : null;

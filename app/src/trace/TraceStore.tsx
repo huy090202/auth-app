@@ -31,4 +31,4 @@ export const traceStore = {
   },
 };
 
-export const useTrace = () => useSyncExternalStore(traceStore.subscribe, () => traceStore.entries);
+export const useTrace = () => useSyncExternalStore(traceStore.subscribe, () => traceStore.entries, () => traceStore.entries);

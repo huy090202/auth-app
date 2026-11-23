@@ -33,8 +33,17 @@ if [[ -z "$client_id" ]] && aws cloudformation describe-stacks --region "$REGION
   stack_exists=1
 fi
 
+# The prerendered docs pages: one slug per docs/en/*.md, and every slug needs both languages.
+slugs_of() { (cd "$ROOT/docs/$1" && for f in *.md; do [[ ! -e "$f" ]] || echo "${f%.md}"; done | LC_ALL=C sort); }
+en_slugs="$(slugs_of en)"
+[[ "$en_slugs" == "$(slugs_of vi)" ]] || die "docs/en and docs/vi differ: every docs slug needs both languages"
+# The loader's own list must match: a .md it does not list would be mapped to a folder the prerender never wrote.
+loader_slugs="$(sed -n "/^export const slugs = \[/,/\] as const/p" "$ROOT/app/src/docs/loader.ts" | grep -o "'[^']*'" | tr -d "'" | LC_ALL=C sort)"
+[[ "$en_slugs" == "$loader_slugs" ]] || die "docs/en and the slugs list in app/src/docs/loader.ts differ: add the slug to both"
+doc_slugs="$(echo "$en_slugs" | paste -sd, -)"
+
 # sam rejects empty overrides ("AuthGateClientId="); the template defaults it to "".
-params=("Stage=$STAGE" "AuthGateBaseUrl=${AUTHGATE_BASE_URL%/}" "Trace=${TRACE:-1}")
+params=("Stage=$STAGE" "AuthGateBaseUrl=${AUTHGATE_BASE_URL%/}" "Trace=${TRACE:-1}" "DocSlugs=$doc_slugs")
 [[ -z "$client_id" ]] || params+=("AuthGateClientId=$client_id")
 [[ -z "$DOMAIN" ]] || params+=("DomainName=$DOMAIN" "CertificateArn=$CERT_ARN")
 sam deploy --template-file "$ROOT/infra/template.yaml" \

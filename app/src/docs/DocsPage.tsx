@@ -3,7 +3,7 @@ import { useEffect, type MouseEvent } from 'react';
 import { Link, Navigate, useLocation, useParams } from 'react-router';
 import { docsTitle, useTitle } from '../brand';
 import { portalSignUpUrl } from '../lib/links';
-import { useLang } from '../lib/i18n';
+import { localePath, storeLang, useLang } from '../lib/i18n';
 import { DocsLayout } from './DocsLayout';
 import { pages } from './loader';
 
@@ -32,7 +32,7 @@ export function DocsPage() {
   useEffect(() => {
     if (hash) document.getElementById(hash.slice(1))?.scrollIntoView();
   }, [hash, doc]);
-  if (!doc) return <Navigate to="/docs/what-it-is" replace />;
+  if (!doc) return <Navigate to={localePath(lang, '/docs/what-it-is')} replace />;
   const key = `${lang}/${doc.slug}`;
   return (
     <DocsLayout toc={doc.toc} tocKey={key}>
@@ -44,7 +44,7 @@ export function DocsPage() {
       {/* Our own Markdown from the repo, rendered at build time: trusted HTML. */}
       <div className="doc" key={key} onClick={onCopy} dangerouslySetInnerHTML={{ __html: doc.html }} />
       {doc.tryIt && (
-        <Button component={Link} to={`${doc.tryIt}?trace=1`} size="md" radius="md" className="try-it"
+        <Button component={Link} to={`${doc.tryIt}?trace=1`} onClick={() => storeLang(lang)} size="md" radius="md" className="try-it"
           rightSection={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg>}>
           {lang === 'vi' ? 'Chạy thử' : 'Try it'}
         </Button>

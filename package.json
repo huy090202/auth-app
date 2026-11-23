@@ -10,7 +10,7 @@
     "test": "bash tools/wt/test/hooks.sh && bash tools/wt/test/e2e.sh && bash scripts/setup-and-deploy/test/domain.sh && bash scripts/setup-and-deploy/test/03-deploy.sh && bash scripts/setup-and-deploy/test/00-domain.sh && bash scripts/setup-and-deploy/test/02-register-client.sh && node --test infra/functions/test/*.test.mjs && pnpm -r test",
     "typecheck": "pnpm -r typecheck",
     "build": "pnpm -r build",
-    "check": "pnpm run lint && pnpm run typecheck && pnpm run test && pnpm run build",
+    "check": "pnpm run lint && pnpm run typecheck && pnpm run test && pnpm run build && pnpm --filter app test:prerender",
     "bruno:local": "cd bruno && bru run --env local"
   },
   "devDependencies": {

@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router';
 import { Backdrop, Brand } from './brand';
 import { DocsNav } from './docs/DocsLayout';
-import { useLang, type Lang } from './lib/i18n';
+import { localePath, storeLang, useLang, type Lang } from './lib/i18n';
 import { portalSignUpUrl } from './lib/links';
 import { AppRoutes } from './routes';
 import { TraceDrawer } from './trace/TraceDrawer';
@@ -30,8 +30,10 @@ function SchemeToggle() {
 
 export function App() {
   const [lang, setLang] = useLang();
+  // The prerendered file fixes <html lang>; keep it equal to the page language after a client-side change.
+  useEffect(() => { document.documentElement.lang = lang; }, [lang]);
   const { pathname } = useLocation();
-  const inDocs = pathname.startsWith('/docs');
+  const inDocs = /^(\/vi)?\/docs(\/|$)/.test(pathname);
   const [navOpen, setNavOpen] = useState(false);
   useEffect(() => setNavOpen(false), [pathname]);
   return (
@@ -44,8 +46,8 @@ export function App() {
         )}
         <Brand />
         <nav className="topnav" aria-label="Main">
-          <Link to="/docs/what-it-is" aria-current={inDocs ? 'page' : undefined}>Docs</Link>
-          <Link to="/app/login" aria-current={pathname.startsWith('/app') ? 'page' : undefined}>Demo</Link>
+          <Link to={localePath(lang, '/docs/what-it-is')} aria-current={inDocs ? 'page' : undefined}>Docs</Link>
+          <Link to="/app/login" onClick={() => storeLang(lang)} aria-current={pathname.startsWith('/app') ? 'page' : undefined}>Demo</Link>
         </nav>
         <div className="header-tools">
           <Button component="a" href={portalSignUpUrl} size="xs" radius="md" visibleFrom="sm">{lang === 'vi' ? 'Đăng ký' : 'Sign up'}</Button>

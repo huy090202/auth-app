@@ -1,5 +1,6 @@
 import react from '@vitejs/plugin-react';
-import { defineConfig, searchForWorkspaceRoot } from 'vite';
+import { searchForWorkspaceRoot } from 'vite';
+import { configDefaults, defineConfig } from 'vitest/config';
 
 export default defineConfig({
   plugins: [react()],
@@ -8,4 +9,5 @@ export default defineConfig({
     // The Markdown pages live in the repo's docs/, outside app/.
     fs: { allow: [searchForWorkspaceRoot(new URL('.', import.meta.url).pathname), '../docs'] },
   },
+  test: { exclude: [...configDefaults.exclude, 'test-dist/**'] },
 });

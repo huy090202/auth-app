@@ -45,7 +45,8 @@ function Entry({ e }: { e: TraceEntry }) {
   );
 }
 
-const openedFromUrl = () => new URLSearchParams(window.location.search).get('trace') === '1';
+// No window while prerendering: the drawer starts closed.
+const openedFromUrl = () => typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('trace') === '1';
 
 export function TraceDrawer() {
   const t = useStrings();

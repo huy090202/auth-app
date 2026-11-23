@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "tsc -b && vite build && vite build --ssr src/entry-server.tsx --outDir dist-ssr && node scripts/prerender.mjs",
+    "test:prerender": "vitest run --config vitest.prerender.config.ts",
     "typecheck": "tsc -b",
     "test": "vitest run --passWithNoTests",
     "lint": "eslint ."
@@ -26,6 +27,7 @@
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^4.7.0",
     "eslint": "^10.13.0",
+    "jsdom": "^26.1.0",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.72.0",
     "vite": "^6.4.4",

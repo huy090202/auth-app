@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
-import { Link } from 'react-router';
+import { Link, useLocation } from 'react-router';
+import { localePath, useLang } from './lib/i18n';
 
 /** The mark: a gate arch with a leaf growing through it. Same drawing as public/favicon.svg. */
 export function LogoMark({ size = 28 }: { size?: number }) {
@@ -14,10 +15,12 @@ export function LogoMark({ size = 28 }: { size?: number }) {
 }
 
 export function Brand() {
+  const [lang] = useLang();
+  const onLanding = localePath('en', useLocation().pathname) === '/';
   return (
-    <Link to="/docs/what-it-is" className="brand" aria-label="AuthGate Docs, home">
+    <Link to={localePath(lang, '/')} className="brand" aria-label={`${onLanding ? 'AuthGate' : 'AuthGate Docs'}, ${lang === 'vi' ? 'trang chủ' : 'home'}`}>
       <LogoMark />
-      <span className="word">AuthGate<span>Docs</span></span>
+      <span className="word">AuthGate{!onLanding && <span>Docs</span>}</span>
     </Link>
   );
 }
