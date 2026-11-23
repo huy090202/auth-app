@@ -4,8 +4,8 @@ tryIt: /app/login
 ---
 # 2FA sau bước nhập mật khẩu
 
-Mật khẩu thì bạn tự check. Nếu user đã có yếu tố, cấp cho họ một session "nửa vời" chỉ đủ quyền làm
-bước thứ hai, rồi gọi AuthGate.
+Bạn tự kiểm tra mật khẩu. User nào đã có yếu tố thì cấp cho họ một half session, tức session chỉ đủ
+quyền làm bước thứ hai, rồi gọi AuthGate.
 
 ```text
 browser              your backend                     AuthGate
@@ -35,7 +35,7 @@ const { status, data } = await authGate('POST', '/api/challenges', {
 // Keep data.challengeId in the half session, send data.publicKey to the browser.
 ```
 
-Chuyển câu trả lời sang AuthGate, verify token, rồi đổi session nửa vời thành session đầy đủ:
+Chuyển câu trả lời sang AuthGate, verify token, rồi thay half session bằng session đầy đủ:
 
 ```ts
 const proof = pin !== undefined ? { pin } : { credential };
@@ -53,14 +53,14 @@ if (status === 200) {
 Gửi đúng một trong hai: `pin` hoặc `credential`. Hàm `verifyAuthGateToken` nằm ở trang
 [Verify token](/docs/verify-token).
 
-Giữ `challengeId` ở phía bạn. AuthGate chỉ gắn challenge với client của bạn, không gắn với browser,
-nên nếu lấy nó từ request thì user này có thể trả lời challenge của user khác. Khi đó bước check
-`sub` sẽ từ chối token, nhưng `200` hay `400` vẫn cho biết đoán PIN đúng hay sai, và mỗi lần đoán sai
-đều tính vào lượt khoá của user kia.
+Giữ `challengeId` ở phía bạn, đừng lấy từ request. AuthGate chỉ gắn challenge với client của bạn,
+không gắn với browser. Nếu lấy `challengeId` từ request, user này có thể trả lời challenge của user
+khác. Bước check `sub` sẽ từ chối token, nhưng `200` hay `400` vẫn cho biết PIN đoán đúng hay sai,
+và mỗi lần đoán sai đều tính vào lượt khoá của user kia.
 
 ## Browser
 
-Với PIN, gửi `{ pin }` về backend. Với passkey, dùng các hàm ở phần
+PIN thì gửi `{ pin }` về backend. Passkey thì dùng các hàm ở phần
 [Chuyển đổi dữ liệu WebAuthn](/docs/enroll#chuyen-doi-du-lieu-webauthn):
 
 ```ts
@@ -75,7 +75,7 @@ const credential = serializeCredential(cred);
 
 - `400 verification_failed`: trả lời sai. Hỏi lại trên chính challenge đó, hoặc mở challenge mới khi
   `attemptsRemaining` về 0.
-- `423 locked`: sai PIN quá nhiều lần. Hiện `lockedUntil`.
-- `410 challenge_gone`: hết hạn, đã dùng hoặc hết lượt thử. Mở challenge mới.
+- `423 locked`: sai PIN quá nhiều lần. Hiện `lockedUntil` cho user.
+- `410 challenge_gone`: challenge hết hạn, đã dùng hoặc hết lượt thử. Mở challenge mới.
 
 Danh sách đầy đủ ở trang [Xử lý lỗi](/docs/errors).
