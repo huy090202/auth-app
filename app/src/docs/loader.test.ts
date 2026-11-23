@@ -46,3 +46,14 @@ describe('renderDoc', () => {
     expect(html).toContain('a &lt;b&gt;');
   });
 });
+
+describe('renderDoc links', () => {
+  it('keeps /docs links in EN and moves them under /vi in VI', () => {
+    const md = '[a](/docs/step-up#x) [b](https://example.com/docs/x) [c](#top)';
+    expect(renderDoc(md).html).toContain('href="/docs/step-up#x"');
+    const vi = renderDoc(md, 'vi').html;
+    expect(vi).toContain('href="/vi/docs/step-up#x"');
+    expect(vi).toContain('href="https://example.com/docs/x"');
+    expect(vi).toContain('href="#top"');
+  });
+});

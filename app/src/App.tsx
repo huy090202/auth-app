@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router';
 import { Backdrop, Brand } from './brand';
 import { DocsNav } from './docs/DocsLayout';
-import { useLang, type Lang } from './lib/i18n';
+import { localePath, useLang, type Lang } from './lib/i18n';
 import { portalSignUpUrl } from './lib/links';
 import { AppRoutes } from './routes';
 import { TraceDrawer } from './trace/TraceDrawer';
@@ -31,7 +31,7 @@ function SchemeToggle() {
 export function App() {
   const [lang, setLang] = useLang();
   const { pathname } = useLocation();
-  const inDocs = pathname.startsWith('/docs');
+  const inDocs = /^(\/vi)?\/docs(\/|$)/.test(pathname);
   const [navOpen, setNavOpen] = useState(false);
   useEffect(() => setNavOpen(false), [pathname]);
   return (
@@ -44,7 +44,7 @@ export function App() {
         )}
         <Brand />
         <nav className="topnav" aria-label="Main">
-          <Link to="/docs/what-it-is" aria-current={inDocs ? 'page' : undefined}>Docs</Link>
+          <Link to={localePath(lang, '/docs/what-it-is')} aria-current={inDocs ? 'page' : undefined}>Docs</Link>
           <Link to="/app/login" aria-current={pathname.startsWith('/app') ? 'page' : undefined}>Demo</Link>
         </nav>
         <div className="header-tools">
