@@ -40,7 +40,9 @@ headers="$(curl -sS -o /dev/null -D - -w 'status:%{http_code}\n' "$base_url/docs
 grep -q '^status:200$' <<<"$headers" || die "/docs/step-up is not 200"
 grep -qi '^content-type: *text/html' <<<"$headers" || die "/docs/step-up is not text/html"
 # The shell answers 200 text/html too; only a prerendered page has a canonical link.
-curl -sS "$base_url/docs/step-up" | grep -q 'rel="canonical"' || die "/docs/step-up has no rel=\"canonical\": the shell was served, not the prerendered page"
+# Read the page first: grep -q on a pipe would close it early and fail curl under pipefail.
+page="$(curl -sS "$base_url/docs/step-up")"
+grep -q 'rel="canonical"' <<<"$page" || die "/docs/step-up has no rel=\"canonical\": the shell was served, not the prerendered page"
 
 echo "curl: $base_url/api/does-not-exist"
 body="$(curl -sS -w '\nstatus:%{http_code}' "$base_url/api/does-not-exist")"
